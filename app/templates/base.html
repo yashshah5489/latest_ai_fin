@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} | Smart AI Financial Analyzer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Add custom configuration for Tailwind -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0EA5E9', /* Sky Blue */
+                            50: '#F0F9FF',
+                            100: '#E0F2FE',
+                            200: '#BAE6FD',
+                            300: '#7DD3FC',
+                            400: '#38BDF8',
+                            500: '#0EA5E9',
+                            600: '#0284C7',
+                            700: '#0369A1',
+                            800: '#075985',
+                            900: '#0C4A6E',
+                        },
+                        dark: {
+                            700: '#1E293B', /* Slate 800 */
+                            800: '#0F172A', /* Slate 900 */
+                            900: '#020617', /* Slate 950 */
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom styles -->
+    <style>
+        /* Apply dark mode by default */
+        body {
+            @apply bg-slate-950 text-slate-100;
+        }
+        
+        /* Chat bubble styles */
+        .chat-bubble-ai {
+            @apply bg-slate-900 rounded-tr-xl rounded-br-xl rounded-bl-xl;
+        }
+        .chat-bubble-user {
+            @apply ml-auto bg-primary rounded-tl-xl rounded-tr-xl rounded-bl-xl;
+        }
+        
+        /* Navbar and sidebar styles */
+        .sidebar-link {
+            @apply flex items-center gap-3 px-3 py-2 rounded-lg transition-colors;
+        }
+        .sidebar-link.active {
+            @apply bg-primary text-white;
+        }
+        .sidebar-link:not(.active) {
+            @apply text-slate-400 hover:text-white hover:bg-slate-800;
+        }
+        
+        /* Form styles */
+        input, select, textarea {
+            @apply bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500;
+        }
+        button.primary {
+            @apply bg-primary hover:bg-primary-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors;
+        }
+        button.secondary {
+            @apply bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen">
+    <!-- Navbar -->
+    {% if request.url.path != "/login" and request.url.path != "/register" and request.url.path != "/" %}
+    <nav class="bg-slate-900 border-b border-slate-800 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="/" class="text-xl font-bold text-white">Smart AI Financial Analyzer</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/profile" class="text-slate-300 hover:text-white">
+                    <i class="fas fa-user-circle text-xl"></i>
+                </a>
+                <form action="/logout" method="post" class="inline">
+                    <button type="submit" class="text-slate-300 hover:text-white">
+                        <i class="fas fa-sign-out-alt text-xl"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar (only on internal pages) -->
+        {% if request.url.path != "/login" and request.url.path != "/register" and request.url.path != "/" %}
+        <aside class="w-64 min-h-screen bg-slate-900 border-r border-slate-800 p-4">
+            <nav class="space-y-2 mt-6">
+                <a href="/dashboard" class="sidebar-link {% if request.url.path == '/dashboard' %}active{% endif %}">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/investments" class="sidebar-link {% if request.url.path == '/investments' %}active{% endif %}">
+                    <i class="fas fa-money-bill-trend-up w-5"></i>
+                    <span>Investments</span>
+                </a>
+                <a href="/documents" class="sidebar-link {% if request.url.path == '/documents' %}active{% endif %}">
+                    <i class="fas fa-file-alt w-5"></i>
+                    <span>Documents</span>
+                </a>
+                <a href="/ai-advisor" class="sidebar-link {% if request.url.path == '/ai-advisor' %}active{% endif %}">
+                    <i class="fas fa-robot w-5"></i>
+                    <span>AI Advisor</span>
+                </a>
+                <a href="/risk-analysis" class="sidebar-link {% if request.url.path == '/risk-analysis' %}active{% endif %}">
+                    <i class="fas fa-chart-pie w-5"></i>
+                    <span>Risk Analysis</span>
+                </a>
+            </nav>
+        </aside>
+        {% endif %}
+
+        <!-- Main content -->
+        <main class="flex-1 p-6">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 p-6 border-t border-slate-800">
+        <div class="container mx-auto">
+            <div class="text-center">
+                <p>&copy; 2025 Smart AI Financial Analyzer. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

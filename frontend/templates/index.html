@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block public_content %}
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Smart AI Financial Analyzer</h1>
+            <p>Your personalized AI assistant for smarter financial decisions in the Indian market</p>
+            <div class="hero-buttons">
+                <a href="/login" class="btn">Login</a>
+                <a href="/register" class="btn btn-outline">Register</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features-section">
+    <div class="container">
+        <h2 class="section-title">Key Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3>AI Financial Advisor</h3>
+                <p>Get personalized investment advice and financial insights using advanced AI technology</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Portfolio Analysis</h3>
+                <p>Track and analyze your investments with detailed portfolio performance metrics</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h3>Document Processing</h3>
+                <p>Upload financial documents and get AI-powered analysis and summaries</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-balance-scale"></i>
+                </div>
+                <h3>Risk Assessment</h3>
+                <p>Evaluate your risk tolerance and get personalized asset allocation recommendations</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="how-it-works">
+    <div class="container">
+        <h2 class="section-title">How It Works</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Create an Account</h3>
+                <p>Sign up and set up your financial profile with basic information</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Connect Your Data</h3>
+                <p>Upload documents or manually input your financial information</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Get AI Insights</h3>
+                <p>Receive personalized financial advice and analysis based on your data</p>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Make Better Decisions</h3>
+                <p>Use the insights to optimize your investments and financial planning</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to take control of your finances?</h2>
+            <p>Join thousands of users who are making smarter financial decisions with AI assistance</p>
+            <a href="/register" class="btn">Get Started Now</a>
+        </div>
+    </div>
+</section>
+
+<style>
+/* Index Page Specific Styles */
+.hero-section {
+    background: linear-gradient(120deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 80px 0;
+    text-align: center;
+}
+
+.hero-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    font-size: 1.25rem;
+    max-width: 600px;
+    margin: 0 auto 30px;
+}
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid white;
+}
+
+.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2rem;
+}
+
+.features-section {
+    padding: 80px 0;
+    background-color: var(--light-bg);
+}
+
+body.dark-theme .features-section {
+    background-color: var(--dark-bg);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+}
+
+.feature-card {
+    background-color: var(--light-card-bg);
+    padding: 30px;
+    border-radius: 8px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+body.dark-theme .feature-card {
+    background-color: var(--dark-card-bg);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-theme .feature-card:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+}
+
+.feature-card h3 {
+    margin-bottom: 15px;
+}
+
+.feature-card p {
+    color: var(--light-text-secondary);
+}
+
+body.dark-theme .feature-card p {
+    color: var(--dark-text-secondary);
+}
+
+.how-it-works {
+    padding: 80px 0;
+    background-color: var(--light-card-bg);
+}
+
+body.dark-theme .how-it-works {
+    background-color: var(--dark-card-bg);
+}
+
+.steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 30px;
+}
+
+.step {
+    text-align: center;
+    position: relative;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin: 0 auto 15px;
+}
+
+.step h3 {
+    margin-bottom: 10px;
+}
+
+.step p {
+    color: var(--light-text-secondary);
+}
+
+body.dark-theme .step p {
+    color: var(--dark-text-secondary);
+}
+
+.cta-section {
+    padding: 80px 0;
+    background: linear-gradient(120deg, var(--indian-blue) 0%, var(--primary-dark) 100%);
+    color: white;
+    text-align: center;
+}
+
+.cta-content h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.cta-content p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto 30px;
+}
+
+@media (max-width: 768px) {
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-content p {
+        font-size: 1rem;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+    }
+    
+    .steps {
+        grid-template-columns: 1fr;
+    }
+    
+    .cta-content h2 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // If needed, add any page-specific JavaScript here
+</script>
+{% endblock %}

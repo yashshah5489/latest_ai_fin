@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Smart AI Financial Analyzer{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4" id="dashboard-overview">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-4">Financial Dashboard</h1>
+            <p class="text-muted">Welcome back, {{ request.user.full_name or request.user.username }}! Here's your financial overview.</p>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Balance</h6>
+                            <h3 class="mb-0">₹{{ dashboard_data.totalBalance|format_currency }}</h3>
+                            {% if dashboard_data.balanceChange > 0 %}
+                                <span class="badge bg-success">+{{ dashboard_data.balanceChange }}%</span>
+                            {% else %}
+                                <span class="badge bg-danger">{{ dashboard_data.balanceChange }}%</span>
+                            {% endif %}
+                        </div>
+                        <div class="stat-icon {% if dashboard_data.balanceChange > 0 %}positive{% else %}negative{% endif %}">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Investments</h6>
+                            <h3 class="mb-0">₹{{ dashboard_data.totalInvestments|format_currency }}</h3>
+                            {% if dashboard_data.investmentsChange > 0 %}
+                                <span class="badge bg-success">+{{ dashboard_data.investmentsChange }}%</span>
+                            {% else %}
+                                <span class="badge bg-danger">{{ dashboard_data.investmentsChange }}%</span>
+                            {% endif %}
+                        </div>
+                        <div class="stat-icon {% if dashboard_data.investmentsChange > 0 %}positive{% else %}negative{% endif %}">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Monthly Expenses</h6>
+                            <h3 class="mb-0">₹{{ dashboard_data.monthlyExpenses|format_currency }}</h3>
+                            {% if dashboard_data.expensesChange < 0 %}
+                                <span class="badge bg-success">{{ dashboard_data.expensesChange }}%</span>
+                            {% else %}
+                                <span class="badge bg-danger">+{{ dashboard_data.expensesChange }}%</span>
+                            {% endif %}
+                        </div>
+                        <div class="stat-icon {% if dashboard_data.expensesChange < 0 %}positive{% else %}negative{% endif %}">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Portfolio Growth</h6>
+                            <h3 class="mb-0">{{ dashboard_data.portfolioGrowth }}%</h3>
+                            {% if dashboard_data.growthChange > 0 %}
+                                <span class="badge bg-success">+{{ dashboard_data.growthChange }}%</span>
+                            {% else %}
+                                <span class="badge bg-danger">{{ dashboard_data.growthChange }}%</span>
+                            {% endif %}
+                        </div>
+                        <div class="stat-icon {% if dashboard_data.growthChange > 0 %}positive{% else %}negative{% endif %}">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts and AI Insight -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="row">
+                <!-- Portfolio Distribution -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">Portfolio Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="portfolio-distribution-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Income/Expense Trend -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">Income vs Expenses (₹)</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="income-expense-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Investment Overview -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Investment Overview</h5>
+                            <a href="/investments" class="btn btn-sm btn-outline-primary">View All</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Investment</th>
+                                            <th>Type</th>
+                                            <th class="text-end">Value (₹)</th>
+                                            <th class="text-end">Allocation</th>
+                                            <th class="text-end">Return</th>
+                                            <th>Risk Level</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for investment in investments[:5] %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-2"><i class="{{ investment.icon }}"></i></div>
+                                                    {{ investment.name }}
+                                                </div>
+                                            </td>
+                                            <td>{{ investment.type }}</td>
+                                            <td class="text-end">₹{{ investment.value|format_currency }}</td>
+                                            <td class="text-end">{{ investment.allocation }}%</td>
+                                            <td class="text-end {% if investment.return > 0 %}text-success{% else %}text-danger{% endif %}">
+                                                {% if investment.return > 0 %}+{% endif %}{{ investment.return }}%
+                                            </td>
+                                            <td>
+                                                {% if investment.riskLevel == 'Low' %}
+                                                <span class="badge bg-success">Low</span>
+                                                {% elif investment.riskLevel == 'Medium' %}
+                                                <span class="badge bg-warning">Medium</span>
+                                                {% else %}
+                                                <span class="badge bg-danger">High</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- AI Insight -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">AI Financial Insight</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3 rounded-circle bg-primary p-2 text-white">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">AI Advisor</h6>
+                            <small class="text-muted">Powered by GROQ LLM</small>
+                        </div>
+                    </div>
+                    
+                    <p class="mb-3">{{ ai_insight.message }}</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Confidence: {{ ai_insight.confidence }}%</small>
+                        <a href="/ai-advisor" class="btn btn-sm btn-primary">Chat with AI</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Financial News -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Financial News</h5>
+                    <span class="badge bg-primary">India Focus</span>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for news in news_items[:4] %}
+                        <li class="list-group-item border-bottom">
+                            <h6 class="mb-1">{{ news.title }}</h6>
+                            <p class="mb-1 small">{{ news.description[:100] }}{% if news.description|length > 100 %}...{% endif %}</p>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">{{ news.source }}</small>
+                                <a href="{{ news.url }}" target="_blank" class="btn btn-sm btn-link p-0">Read More</a>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="https://www.moneycontrol.com/" target="_blank" class="btn btn-sm btn-outline-primary">View More News</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

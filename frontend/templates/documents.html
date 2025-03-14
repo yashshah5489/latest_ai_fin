@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}Documents - Smart AI Financial Analyzer{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4" id="documents-container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-4">Document Analysis</h1>
+            <p class="text-muted">Upload financial documents for AI-powered analysis and insights.</p>
+        </div>
+    </div>
+    
+    <!-- Upload Card -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Upload Documents</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <form id="document-upload-form" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="document-file" class="form-label">Choose Document to Upload</label>
+                                    <div class="input-group">
+                                        <input type="file" class="form-control" id="document-file" name="file" accept=".pdf,.xlsx,.xls,.csv">
+                                        <label class="input-group-text custom-file-label" for="document-file">Browse</label>
+                                    </div>
+                                    <div class="form-text">Upload PDF, Excel, or CSV files for analysis.</div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-cloud-upload-alt me-1"></i> Upload & Analyze
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card h-100 bg-primary bg-opacity-10 border-0">
+                                <div class="card-body">
+                                    <h5>Supported Documents</h5>
+                                    <ul class="mb-0">
+                                        <li>Mutual Fund Statements</li>
+                                        <li>Portfolio Statements</li>
+                                        <li>Bank Statements</li>
+                                        <li>Form 26AS (Tax Credit)</li>
+                                        <li>Insurance Policies</li>
+                                        <li>Investment Summaries</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Document List -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Your Documents</h5>
+                    <div>
+                        <span class="badge bg-primary me-2">PDF</span>
+                        <span class="badge bg-success me-2">Excel</span>
+                        <span class="badge bg-info">CSV</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if documents|length > 0 %}
+                    <div class="row">
+                        {% for document in documents %}
+                        <div class="col-md-4 col-lg-3 mb-4">
+                            <div class="card document-card h-100">
+                                <div class="card-body text-center">
+                                    <div class="document-icon mb-2">
+                                        {% if document.type == 'pdf' %}
+                                        <i class="fas fa-file-pdf text-danger"></i>
+                                        {% elif document.type == 'xlsx' or document.type == 'xls' %}
+                                        <i class="fas fa-file-excel text-success"></i>
+                                        {% elif document.type == 'csv' %}
+                                        <i class="fas fa-file-csv text-info"></i>
+                                        {% else %}
+                                        <i class="fas fa-file-alt text-muted"></i>
+                                        {% endif %}
+                                    </div>
+                                    <h6 class="mb-1">{{ document.name }}</h6>
+                                    <p class="text-muted small mb-2">Uploaded: {{ document.uploadedAt }}</p>
+                                    <p class="text-muted small mb-3">Size: {{ document.size // 1024 }} KB</p>
+                                    
+                                    {% if document.analysisStatus == 'pending' %}
+                                    <div class="d-flex justify-content-center mb-2">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <span class="ms-2 text-primary">Analyzing...</span>
+                                    </div>
+                                    {% elif document.analysisStatus == 'failed' %}
+                                    <div class="text-danger mb-2">
+                                        <i class="fas fa-exclamation-circle"></i> Analysis failed
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="d-grid gap-2">
+                                        {% if document.analysisStatus == 'completed' %}
+                                        <button class="btn btn-sm btn-outline-primary view-analysis" data-bs-toggle="modal" data-bs-target="#analysisModal" data-document-id="{{ document.id }}">
+                                            View Analysis
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="fas fa-file-upload fa-3x text-muted"></i>
+                        </div>
+                        <h5>No documents uploaded yet</h5>
+                        <p class="text-muted">Upload your financial documents to get started with AI-powered analysis.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- How It Works -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">How Document Analysis Works</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 mx-auto mb-3" style="width: 80px; height: 80px;">
+                                <i class="fas fa-cloud-upload-alt fa-2x text-primary"></i>
+                            </div>
+                            <h5>Upload</h5>
+                            <p class="text-muted">Upload your financial documents securely to our platform.</p>
+                        </div>
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 mx-auto mb-3" style="width: 80px; height: 80px;">
+                                <i class="fas fa-robot fa-2x text-primary"></i>
+                            </div>
+                            <h5>AI Analysis</h5>
+                            <p class="text-muted">Our AI extracts and processes financial data from your documents.</p>
+                        </div>
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 mx-auto mb-3" style="width: 80px; height: 80px;">
+                                <i class="fas fa-lightbulb fa-2x text-primary"></i>
+                            </div>
+                            <h5>Insights</h5>
+                            <p class="text-muted">Receive personalized insights and financial recommendations.</p>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 mx-auto mb-3" style="width: 80px; height: 80px;">
+                                <i class="fas fa-chart-line fa-2x text-primary"></i>
+                            </div>
+                            <h5>Actions</h5>
+                            <p class="text-muted">Take informed actions based on the analysis to improve your finances.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analysis Modal -->
+<div class="modal fade" id="analysisModal" tabindex="-1" aria-labelledby="analysisModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="analysisModalLabel">Document Analysis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="analysis-loading" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Loading analysis...</p>
+                </div>
+                
+                <div id="analysis-content" class="d-none">
+                    <h5 class="mb-3">Summary</h5>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <p id="analysis-summary"></p>
+                        </div>
+                    </div>
+                    
+                    <h5 class="mb-3">Key Insights</h5>
+                    <div class="card">
+                        <div class="card-body">
+                            <ul id="analysis-insights" class="list-group list-group-flush">
+                                <!-- Insights will be added here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="chat-about-document">
+                    <i class="fas fa-comment-dots me-1"></i> Ask AI About This Document
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle document upload
+        const uploadForm = document.getElementById('document-upload-form');
+        
+        if(uploadForm) {
+            uploadForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                const fileInput = document.getElementById('document-file');
+                if(fileInput.files.length === 0) {
+                    alert('Please select a file to upload');
+                    return;
+                }
+                
+                // Show loading state
+                const submitBtn = uploadForm.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...';
+                submitBtn.disabled = true;
+                
+                // Prepare form data
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                
+                // Upload file
+                fetch('/api/v1/documents/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Show success message
+                    alert('Document uploaded successfully. It will be analyzed in the background.');
+                    
+                    // Reset form
+                    uploadForm.reset();
+                    
+                    // Refresh document list
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred during document upload. Please try again.');
+                })
+                .finally(() => {
+                    // Restore button state
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+            });
+        }
+        
+        // Handle analysis modal
+        const analysisModal = document.getElementById('analysisModal');
+        const viewAnalysisButtons = document.querySelectorAll('.view-analysis');
+        
+        if(analysisModal && viewAnalysisButtons.length > 0) {
+            viewAnalysisButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const documentId = this.getAttribute('data-document-id');
+                    
+                    // Show loading state
+                    document.getElementById('analysis-loading').classList.remove('d-none');
+                    document.getElementById('analysis-content').classList.add('d-none');
+                    
+                    // Fetch analysis
+                    fetch(`/api/v1/documents/${documentId}/analysis`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Hide loading state
+                        document.getElementById('analysis-loading').classList.add('d-none');
+                        document.getElementById('analysis-content').classList.remove('d-none');
+                        
+                        // Update modal content
+                        document.getElementById('analysis-summary').textContent = data.summary;
+                        
+                        // Clear insights list
+                        const insightsList = document.getElementById('analysis-insights');
+                        insightsList.innerHTML = '';
+                        
+                        // Add insights
+                        if(data.insights && data.insights.length > 0) {
+                            data.insights.forEach(insight => {
+                                const li = document.createElement('li');
+                                li.className = 'list-group-item';
+                                li.textContent = insight;
+                                insightsList.appendChild(li);
+                            });
+                        } else {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item text-muted';
+                            li.textContent = 'No insights available for this document.';
+                            insightsList.appendChild(li);
+                        }
+                        
+                        // Set up chat button
+                        const chatBtn = document.getElementById('chat-about-document');
+                        chatBtn.onclick = function() {
+                            window.location.href = `/ai-advisor?document=${documentId}`;
+                        };
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while fetching the analysis. Please try again.');
+                        
+                        // Hide modal
+                        const modal = bootstrap.Modal.getInstance(analysisModal);
+                        modal.hide();
+                    });
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

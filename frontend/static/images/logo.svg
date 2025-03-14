@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="50" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient background for the logo -->
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D81FF" />
+      <stop offset="100%" stop-color="#6D35E3" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Shield shape for financial security -->
+  <path d="M30 5L10 15V25C10 36 18 45 30 48C42 45 50 36 50 25V15L30 5Z" fill="url(#logoGradient)" />
+  
+  <!-- Rupee symbol for India focus -->
+  <path d="M30 12L38 12M30 19L38 19M22 12H30M30 12V40M30 19H22M22 26L30 40L38 26" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- AI/Brain icon element -->
+  <circle cx="30" cy="26" r="5" fill="#FF9A3C" />
+  <path d="M28 31L26 36M32 31L34 36M24 29H36" stroke="#FF9A3C" stroke-width="1.5" stroke-linecap="round" />
+  
+  <!-- Text part -->
+  <text x="60" y="25" font-family="Arial, sans-serif" font-weight="bold" font-size="18" fill="#2D81FF">Smart AI</text>
+  <text x="60" y="42" font-family="Arial, sans-serif" font-weight="bold" font-size="16" fill="#6D35E3">Financial Analyzer</text>
+</svg>

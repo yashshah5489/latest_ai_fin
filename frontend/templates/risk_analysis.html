@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Risk Analysis - Smart AI Financial Analyzer{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-4">Risk Profile Analysis</h1>
+            <p class="text-muted">Assess your risk tolerance and get personalized investment recommendations based on your financial profile.</p>
+        </div>
+    </div>
+    
+    <!-- Risk Analysis Form -->
+    <div class="row" id="risk-analysis-form-container">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Risk Tolerance Assessment</h5>
+                </div>
+                <div class="card-body">
+                    <form id="risk-analysis-form">
+                        <div class="mb-4">
+                            <label for="age" class="form-label">Your Age</label>
+                            <input type="number" class="form-control" id="age" name="age" min="18" max="100" value="35" required>
+                            <div class="form-text">Generally, younger investors can afford to take more risk.</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="investment-horizon" class="form-label">Investment Horizon (years)</label>
+                            <input type="number" class="form-control" id="investment-horizon" name="investmentHorizon" min="1" max="40" value="10" required>
+                            <div class="form-text">Longer investment horizons usually allow for taking more risk.</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="risk-tolerance" class="form-label">Risk Tolerance (1-10)</label>
+                            <input type="range" class="form-range" id="risk-tolerance" name="riskTolerance" min="1" max="10" value="5" required>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Conservative (1)</small>
+                                <small class="text-muted">Moderate (5)</small>
+                                <small class="text-muted">Aggressive (10)</small>
+                            </div>
+                            <div class="form-text">How comfortable are you with the possibility of losing money for potentially higher returns?</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="emergency-fund" class="form-label">Emergency Fund (months of expenses)</label>
+                            <input type="number" class="form-control" id="emergency-fund" name="emergencyFund" min="0" max="36" value="3" required>
+                            <div class="form-text">A larger emergency fund can allow for more aggressive investing.</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="income-stability" class="form-label">Income Stability (1-10)</label>
+                            <input type="range" class="form-range" id="income-stability" name="incomeStability" min="1" max="10" value="7" required>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Unstable (1)</small>
+                                <small class="text-muted">Average (5)</small>
+                                <small class="text-muted">Very Stable (10)</small>
+                            </div>
+                            <div class="form-text">How stable is your income source? Government jobs would be 10, freelancing might be 3-5.</div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Analyze My Risk Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Current Risk Level</h5>
+                </div>
+                <div class="card-body">
+                    <p>Based on your current inputs:</p>
+                    
+                    <div class="risk-meter">
+                        <div id="risk-meter-marker" class="risk-meter-marker" style="left: 50%"></div>
+                    </div>
+                    
+                    <div class="text-center mb-4">
+                        <h4 id="risk-category">Moderate</h4>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6>What this means:</h6>
+                        <p class="mb-1">Your current risk level will help determine:</p>
+                        <ul>
+                            <li>Your optimal asset allocation</li>
+                            <li>The types of investments suitable for you</li>
+                            <li>How to balance growth vs. stability</li>
+                            <li>Recommended investment strategies</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Risk Analysis Results (hidden initially) -->
+    <div class="row d-none" id="risk-analysis-results">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Your Risk Analysis Results</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6 text-center">
+                            <h6 class="text-muted">Risk Score</h6>
+                            <h1 id="result-risk-score" class="display-4">65</h1>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <h6 class="text-muted">Risk Category</h6>
+                            <h2 id="result-risk-category">Moderate</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">Recommended Asset Allocation</h5>
+                            <div style="height: 250px;">
+                                <canvas id="asset-allocation-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">Personalized Recommendations</h5>
+                            <ul id="recommendations-list" class="list-group">
+                                <!-- Recommendations will be added here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <button id="try-again-button" class="btn btn-outline-primary">Adjust Your Profile</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">What This Means</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6>Conservative (0-30)</h6>
+                        <p class="small">Focus on capital preservation. Lower returns but with minimal risk. Suitable for short-term goals or if you're close to retirement.</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>Moderately Conservative (31-50)</h6>
+                        <p class="small">Some growth potential with moderate risk. Good for medium-term goals or pre-retirement investors who need some growth.</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>Moderate (51-70)</h6>
+                        <p class="small">Balanced approach with moderate growth potential and moderate risk. Suitable for medium to long-term goals.</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>Moderately Aggressive (71-85)</h6>
+                        <p class="small">Higher growth potential with increased risk. Good for long-term goals and those who can tolerate market volatility.</p>
+                    </div>
+                    
+                    <div>
+                        <h6>Aggressive (86-100)</h6>
+                        <p class="small">Maximum growth potential with highest risk. Best for very long-term goals and those who can withstand significant market fluctuations.</p>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <p class="small text-muted mb-0">This analysis is based on your inputs and standard financial principles adapted for the Indian market. Always consult with a certified financial advisor before making major investment decisions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

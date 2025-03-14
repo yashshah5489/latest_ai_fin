@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart AI Financial Analyzer - Indian Finance Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Add custom configuration for Tailwind -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0EA5E9', /* Sky Blue */
+                            50: '#F0F9FF',
+                            100: '#E0F2FE',
+                            200: '#BAE6FD',
+                            300: '#7DD3FC',
+                            400: '#38BDF8',
+                            500: '#0EA5E9',
+                            600: '#0284C7',
+                            700: '#0369A1',
+                            800: '#075985',
+                            900: '#0C4A6E',
+                        },
+                        dark: {
+                            700: '#1E293B', /* Slate 800 */
+                            800: '#0F172A', /* Slate 900 */
+                            900: '#020617', /* Slate 950 */
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom styles -->
+    <style>
+        body {
+            @apply bg-slate-950 text-slate-100;
+        }
+        .hero-gradient {
+            background: linear-gradient(to bottom, rgba(2, 6, 23, 0.9), rgba(2, 6, 23, 1));
+        }
+        .feature-card {
+            @apply bg-slate-900 border border-slate-800 rounded-xl p-6 transition-transform hover:-translate-y-1;
+        }
+        .feature-icon {
+            @apply text-primary text-3xl mb-4;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-slate-900/90 backdrop-blur-sm fixed w-full z-10">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-white flex items-center">
+                <i class="fas fa-chart-line text-primary mr-2"></i>
+                Smart AI Financial Analyzer
+            </a>
+            <div class="space-x-4">
+                <a href="/login" class="text-slate-300 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800 transition-colors">Sign In</a>
+                <a href="/register" class="bg-primary hover:bg-primary-600 text-white px-4 py-2 rounded-lg transition-colors">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative pt-24 pb-16 md:pt-36 md:pb-24">
+        <div class="absolute inset-0 z-0 bg-[url('https://images.unsplash.com/photo-1642790551116-3ef6f3f964b8?q=80&w=2070')] bg-cover bg-center">
+            <div class="absolute inset-0 hero-gradient"></div>
+        </div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="max-w-3xl">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+                    AI-Powered Financial Analysis for Indian Investors
+                </h1>
+                <p class="text-xl text-slate-300 mb-8">
+                    Harness the power of AI to analyze your financial documents, optimize investments, 
+                    and make smarter financial decisions tailored to the Indian market.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="/register" class="bg-primary hover:bg-primary-600 text-white font-medium px-6 py-3 rounded-lg transition-colors">
+                        Get Started Free
+                    </a>
+                    <a href="#features" class="bg-slate-800 hover:bg-slate-700 text-white font-medium px-6 py-3 rounded-lg transition-colors">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-slate-900">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Powerful Financial Tools</h2>
+                <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+                    Our platform offers a comprehensive suite of AI-powered tools designed specifically for Indian finances.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="feature-card">
+                    <i class="fas fa-file-invoice feature-icon"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">Document Analysis</h3>
+                    <p class="text-slate-400">
+                        Upload financial statements, tax forms, and investment reports for AI-powered analysis and insights.
+                    </p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="feature-card">
+                    <i class="fas fa-robot feature-icon"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">AI Financial Advisor</h3>
+                    <p class="text-slate-400">
+                        Get personalized financial advice and answers to your questions using our advanced AI assistant.
+                    </p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="feature-card">
+                    <i class="fas fa-chart-pie feature-icon"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">Risk Analysis</h3>
+                    <p class="text-slate-400">
+                        Understand your risk profile and get tailored asset allocation recommendations based on your goals.
+                    </p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="feature-card">
+                    <i class="fas fa-rupee-sign feature-icon"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">Indian Market Focus</h3>
+                    <p class="text-slate-400">
+                        Tools and insights specifically designed for Indian tax laws, market conditions, and investment options.
+                    </p>
+                </div>
+                
+                <!-- Feature 5 -->
+                <div class="feature-card">
+                    <i class="fas fa-chart-line feature-icon"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">Investment Tracking</h3>
+                    <p class="text-slate-400">
+                        Monitor your investments, analyze performance, and identify opportunities to optimize your portfolio.
+                    </p>
+                </div>
+                
+                <!-- Feature 6 -->
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt feature-icon"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">Secure & Private</h3>
+                    <p class="text-slate-400">
+                        Your financial data is encrypted and never shared. We prioritize your privacy and security.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-primary-700 relative">
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="text-center max-w-3xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+                    Start Making Smarter Financial Decisions Today
+                </h2>
+                <p class="text-xl text-primary-100 mb-8">
+                    Join thousands of Indian investors who are using AI to transform their financial future.
+                </p>
+                <a href="/register" class="bg-white hover:bg-slate-100 text-primary-700 font-medium px-8 py-3 rounded-lg inline-block transition-colors">
+                    Create Your Free Account
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-white text-lg font-semibold mb-4">Smart AI Financial Analyzer</h3>
+                    <p class="mb-4">Your AI-powered companion for Indian financial management.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-slate-400 hover:text-primary"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-slate-400 hover:text-primary"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-slate-400 hover:text-primary"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-white text-md font-semibold mb-4">Features</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-primary">Document Analysis</a></li>
+                        <li><a href="#" class="hover:text-primary">AI Advisor</a></li>
+                        <li><a href="#" class="hover:text-primary">Risk Analysis</a></li>
+                        <li><a href="#" class="hover:text-primary">Investment Tracking</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white text-md font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-primary">Blog</a></li>
+                        <li><a href="#" class="hover:text-primary">Help Center</a></li>
+                        <li><a href="#" class="hover:text-primary">API Documentation</a></li>
+                        <li><a href="#" class="hover:text-primary">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white text-md font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2">
+                        <li><a href="mailto:support@aifinancialanalyzer.com" class="hover:text-primary">support@aifinancialanalyzer.com</a></li>
+                        <li>Mumbai, India</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-800 mt-12 pt-8 text-center">
+                <p>&copy; 2025 Smart AI Financial Analyzer. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

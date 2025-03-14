@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient background for the logo -->
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D81FF" />
+      <stop offset="100%" stop-color="#6D35E3" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Shield shape for financial security -->
+  <path d="M32 4L4 16V32C4 48 16 60 32 64C48 60 60 48 60 32V16L32 4Z" fill="url(#logoGradient)" />
+  
+  <!-- Rupee symbol for India focus -->
+  <path d="M32 14L44 14M32 24L44 24M20 14H32M32 14V50M32 24H20M20 34L32 50L44 34" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- AI/Brain icon element -->
+  <circle cx="32" cy="34" r="6" fill="#FF9A3C" />
+  <path d="M29 40L26 46M35 40L38 46M24 37H40" stroke="#FF9A3C" stroke-width="2" stroke-linecap="round" />
+</svg>

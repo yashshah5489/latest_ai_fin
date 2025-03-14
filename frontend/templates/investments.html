@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{% block title %}Investments - Smart AI Financial Analyzer{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4" id="investments-overview">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-4">Investment Portfolio</h1>
+            <p class="text-muted">Track and analyze your investment performance with Indian market insights.</p>
+        </div>
+    </div>
+    
+    <!-- Portfolio Summary -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Portfolio Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="text-center p-3">
+                                <h6 class="text-muted mb-2">Portfolio Value</h6>
+                                <h3 class="mb-1">₹{{ portfolio_summary.portfolioValue|format_currency }}</h3>
+                                {% if portfolio_summary.valueChange > 0 %}
+                                    <span class="badge bg-success">+{{ portfolio_summary.valueChange }}%</span>
+                                {% else %}
+                                    <span class="badge bg-danger">{{ portfolio_summary.valueChange }}%</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="text-center p-3">
+                                <h6 class="text-muted mb-2">Annual Return</h6>
+                                <h3 class="mb-1">{{ portfolio_summary.annualReturn }}%</h3>
+                                {% if portfolio_summary.benchmarkDiff > 0 %}
+                                    <span class="badge bg-success">+{{ portfolio_summary.benchmarkDiff }}% vs Nifty</span>
+                                {% else %}
+                                    <span class="badge bg-danger">{{ portfolio_summary.benchmarkDiff }}% vs Nifty</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="text-center p-3">
+                                <h6 class="text-muted mb-2">Dividend Income</h6>
+                                <h3 class="mb-1">₹{{ portfolio_summary.dividendIncome|format_currency }}</h3>
+                                <span class="text-muted">YTD</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3">
+                                <h6 class="text-muted mb-2">Last Payment</h6>
+                                <h3 class="mb-1">{{ portfolio_summary.lastPaymentDate }}</h3>
+                                <span class="text-muted">Dividend/Interest</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Section -->
+    <div class="row mb-4">
+        <!-- Investment Growth -->
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Portfolio Performance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 350px;">
+                        <canvas id="investment-growth-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Investment Returns -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Annual Returns by Type</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 350px;">
+                        <canvas id="investment-returns-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Investments Table -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Investment Holdings</h5>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#importModal">
+                        <i class="fas fa-file-import me-1"></i> Import Data
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Investment</th>
+                                    <th>Type</th>
+                                    <th class="text-end">Value (₹)</th>
+                                    <th class="text-end">Allocation</th>
+                                    <th class="text-end">Return</th>
+                                    <th>Risk Level</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for investment in investments %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-2"><i class="{{ investment.icon }}"></i></div>
+                                            {{ investment.name }}
+                                        </div>
+                                    </td>
+                                    <td>{{ investment.type }}</td>
+                                    <td class="text-end">₹{{ investment.value|format_currency }}</td>
+                                    <td class="text-end">{{ investment.allocation }}%</td>
+                                    <td class="text-end {% if investment.return > 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {% if investment.return > 0 %}+{% endif %}{{ investment.return }}%
+                                    </td>
+                                    <td>
+                                        {% if investment.riskLevel == 'Low' %}
+                                        <span class="badge bg-success">Low</span>
+                                        {% elif investment.riskLevel == 'Medium' %}
+                                        <span class="badge bg-warning">Medium</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">High</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recommendations -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Investment Recommendations for Indian Market</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5>Equity Allocation</h5>
+                                    <p>Based on your risk profile, consider adjusting your equity allocation to align with the current Indian market conditions.</p>
+                                    <a href="/risk-analysis" class="btn btn-sm btn-outline-primary">Review Risk Profile</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5>Tax Efficiency</h5>
+                                    <p>Consider tax-efficient investment options like ELSS funds for Section 80C benefits in addition to potential market returns.</p>
+                                    <a href="/ai-advisor" class="btn btn-sm btn-outline-primary">Ask AI Advisor</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5>Document Analysis</h5>
+                                    <p>Upload your investment statements for detailed analysis and personalized recommendations by our AI.</p>
+                                    <a href="/documents" class="btn btn-sm btn-outline-primary">Upload Statements</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Import Investment Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="import-form" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="investment-file" class="form-label">Choose File</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="investment-file" name="file" accept=".xlsx,.xls,.csv">
+                            <label class="input-group-text custom-file-label" for="investment-file">Browse</label>
+                        </div>
+                        <div class="form-text">Upload Excel or CSV file with your investment data.</div>
+                    </div>
+                    <div class="mb-3">
+                        <p class="mb-2">File Format Requirements:</p>
+                        <ul class="small">
+                            <li>Column headers: Name, Type, Value, Return</li>
+                            <li>Types: Equity, Mutual Fund, Bond, Gold, FD, etc.</li>
+                            <li>Values: Numeric values without the ₹ symbol</li>
+                            <li>Returns: Percentage values without the % symbol</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="import-submit">Import Data</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle import form submission
+        const importSubmit = document.getElementById('import-submit');
+        const importForm = document.getElementById('import-form');
+        
+        if(importSubmit && importForm) {
+            importSubmit.addEventListener('click', function() {
+                const fileInput = document.getElementById('investment-file');
+                
+                if(fileInput.files.length === 0) {
+                    alert('Please select a file to upload');
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                
+                // Show loading state
+                importSubmit.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Importing...';
+                importSubmit.disabled = true;
+                
+                // Upload file
+                fetch('/api/v1/investments/import', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Show success message and close modal
+                    alert('Data imported successfully!');
+                    
+                    // Reset form
+                    importForm.reset();
+                    
+                    // Hide modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('importModal'));
+                    modal.hide();
+                    
+                    // Refresh page to show new data
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred during import. Please try again.');
+                })
+                .finally(() => {
+                    // Restore button state
+                    importSubmit.innerHTML = 'Import Data';
+                    importSubmit.disabled = false;
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

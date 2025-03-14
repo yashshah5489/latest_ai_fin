@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Smart AI Financial Analyzer{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-4">Profile Settings</h1>
+            <p class="text-muted">Manage your account and preferences.</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Profile Information -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    {% if profile_updated %}
+                    <div class="alert alert-success" role="alert">
+                        Profile updated successfully!
+                    </div>
+                    {% endif %}
+                    
+                    {% if profile_error %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ profile_error }}
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" action="/profile/update">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" value="{{ request.user.username }}" disabled>
+                            <div class="form-text">Username cannot be changed.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="full_name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" value="{{ request.user.full_name or '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ request.user.email or '' }}">
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Change Password -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Change Password</h5>
+                </div>
+                <div class="card-body">
+                    {% if password_updated %}
+                    <div class="alert alert-success" role="alert">
+                        Password updated successfully!
+                    </div>
+                    {% endif %}
+                    
+                    {% if password_error %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ password_error }}
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" action="/profile/password">
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="current_password" name="current_password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required>
+                            <div class="form-text">Password must be at least 6 characters long.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Change Password</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- API Connections -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">API Connections</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <h6 class="mb-0">GROQ API</h6>
+                                <p class="text-muted small mb-0">For AI analysis and personalized recommendations</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="groq-api-switch" {% if groq_api_connected %}checked{% endif %}>
+                                <label class="form-check-label" for="groq-api-switch">
+                                    {% if groq_api_connected %}Connected{% else %}Not Connected{% endif %}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="collapse {% if not groq_api_connected %}show{% endif %}" id="groq-api-collapse">
+                            <div class="card card-body bg-dark-card-bg">
+                                <form method="post" action="/profile/api/groq">
+                                    <div class="mb-3">
+                                        <label for="groq_api_key" class="form-label">GROQ API Key</label>
+                                        <input type="password" class="form-control" id="groq_api_key" name="api_key" placeholder="Enter GROQ API Key">
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-sm btn-primary">Connect</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-0">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <h6 class="mb-0">Tavily API</h6>
+                                <p class="text-muted small mb-0">For real-time financial news and market data</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="tavily-api-switch" {% if tavily_api_connected %}checked{% endif %}>
+                                <label class="form-check-label" for="tavily-api-switch">
+                                    {% if tavily_api_connected %}Connected{% else %}Not Connected{% endif %}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="collapse {% if not tavily_api_connected %}show{% endif %}" id="tavily-api-collapse">
+                            <div class="card card-body bg-dark-card-bg">
+                                <form method="post" action="/profile/api/tavily">
+                                    <div class="mb-3">
+                                        <label for="tavily_api_key" class="form-label">Tavily API Key</label>
+                                        <input type="password" class="form-control" id="tavily_api_key" name="api_key" placeholder="Enter Tavily API Key">
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-sm btn-primary">Connect</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notification Preferences -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Notification Preferences</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="/profile/notifications">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="market-updates" name="market_updates" {% if notifications.market_updates %}checked{% endif %}>
+                                <label class="form-check-label" for="market-updates">Market Updates</label>
+                            </div>
+                            <div class="form-text">Receive notifications about significant market movements.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="portfolio-alerts" name="portfolio_alerts" {% if notifications.portfolio_alerts %}checked{% endif %}>
+                                <label class="form-check-label" for="portfolio-alerts">Portfolio Alerts</label>
+                            </div>
+                            <div class="form-text">Get alerts when your portfolio experiences significant changes.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="investment-recommendations" name="investment_recommendations" {% if notifications.investment_recommendations %}checked{% endif %}>
+                                <label class="form-check-label" for="investment-recommendations">Investment Recommendations</label>
+                            </div>
+                            <div class="form-text">Receive personalized investment recommendations from our AI.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="document-analysis" name="document_analysis" {% if notifications.document_analysis %}checked{% endif %}>
+                                <label class="form-check-label" for="document-analysis">Document Analysis</label>
+                            </div>
+                            <div class="form-text">Get notified when your document analysis is complete.</div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Save Preferences</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle API connection toggles
+        const groqApiSwitch = document.getElementById('groq-api-switch');
+        const groqApiCollapse = document.getElementById('groq-api-collapse');
+        const tavilyApiSwitch = document.getElementById('tavily-api-switch');
+        const tavilyApiCollapse = document.getElementById('tavily-api-collapse');
+        
+        if(groqApiSwitch && groqApiCollapse) {
+            groqApiSwitch.addEventListener('change', function() {
+                if(!this.checked) {
+                    bootstrap.Collapse.getOrCreateInstance(groqApiCollapse).show();
+                } else {
+                    // If toggling to connected state but was previously disconnected,
+                    // this suggests user is trying to disconnect
+                    if(!{{groq_api_connected|tojson}}) {
+                        this.checked = false;
+                        return;
+                    }
+                    
+                    if(confirm('Are you sure you want to disconnect GROQ API?')) {
+                        // Send request to disconnect
+                        fetch('/profile/api/groq/disconnect', {
+                            method: 'POST'
+                        })
+                        .then(response => {
+                            if(!response.ok) {
+                                throw new Error('Failed to disconnect');
+                            }
+                            bootstrap.Collapse.getOrCreateInstance(groqApiCollapse).hide();
+                            return response.json();
+                        })
+                        .then(data => {
+                            if(data.success) {
+                                location.reload();
+                            } else {
+                                throw new Error(data.message || 'Failed to disconnect');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Failed to disconnect: ' + error.message);
+                            this.checked = true;
+                        });
+                    } else {
+                        this.checked = true;
+                    }
+                }
+            });
+        }
+        
+        if(tavilyApiSwitch && tavilyApiCollapse) {
+            tavilyApiSwitch.addEventListener('change', function() {
+                if(!this.checked) {
+                    bootstrap.Collapse.getOrCreateInstance(tavilyApiCollapse).show();
+                } else {
+                    // If toggling to connected state but was previously disconnected,
+                    // this suggests user is trying to disconnect
+                    if(!{{tavily_api_connected|tojson}}) {
+                        this.checked = false;
+                        return;
+                    }
+                    
+                    if(confirm('Are you sure you want to disconnect Tavily API?')) {
+                        // Send request to disconnect
+                        fetch('/profile/api/tavily/disconnect', {
+                            method: 'POST'
+                        })
+                        .then(response => {
+                            if(!response.ok) {
+                                throw new Error('Failed to disconnect');
+                            }
+                            bootstrap.Collapse.getOrCreateInstance(tavilyApiCollapse).hide();
+                            return response.json();
+                        })
+                        .then(data => {
+                            if(data.success) {
+                                location.reload();
+                            } else {
+                                throw new Error(data.message || 'Failed to disconnect');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Failed to disconnect: ' + error.message);
+                            this.checked = true;
+                        });
+                    } else {
+                        this.checked = true;
+                    }
+                }
+            });
+        }
+        
+        // Password confirmation validation
+        const passwordForm = document.querySelector('form[action="/profile/password"]');
+        if(passwordForm) {
+            passwordForm.addEventListener('submit', function(event) {
+                const newPassword = document.getElementById('new_password').value;
+                const confirmPassword = document.getElementById('confirm_password').value;
+                
+                if(newPassword !== confirmPassword) {
+                    event.preventDefault();
+                    alert('New passwords do not match!');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

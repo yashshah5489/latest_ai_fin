@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Smart AI Financial Analyzer{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Login</h3>
+                </div>
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" action="/login">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                            <label class="form-check-label" for="remember">Remember me</label>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <p>Don't have an account? <a href="/register">Register</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <div class="text-center mb-4">
+                        <img src="{{ url_for('static', path='images/logo.svg') }}" alt="Smart AI Financial Analyzer" class="img-fluid mb-4" style="max-width: 200px;">
+                    </div>
+                    <h2 class="text-center mb-4">India's Smart Financial Advisor</h2>
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="stat-icon me-3">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">AI-Powered Analysis</h5>
+                                <p class="text-muted mb-0">Get personalized financial insights using advanced AI</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="stat-icon me-3">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Risk Assessment</h5>
+                                <p class="text-muted mb-0">Understand your risk profile with tailored recommendations</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="stat-icon me-3">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Document Analysis</h5>
+                                <p class="text-muted mb-0">Extract insights from your financial documents automatically</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon me-3">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Performance Tracking</h5>
+                                <p class="text-muted mb-0">Monitor your investments with Indian market context</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
