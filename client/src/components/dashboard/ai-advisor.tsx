@@ -1,96 +1,121 @@
 import { useState, useEffect, useRef } from "react";
-import { Bot, Paperclip, Send } from "lucide-react";
+import { Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ChatMessage from "@/components/ai-chat/chat-message";
+import ChatInput from "@/components/ai-chat/chat-input";
 import UploadButton from "@/components/document-upload/upload-button";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-
-interface Message {
-  id: string;
-  content: string;
-  role: "user" | "assistant";
-  timestamp: Date;
-}
+import { queryClient } from "@/lib/queryClient";
+import { fetchAIInsight, sendChatMessage, fetchChatHistory, type ChatMessage as ChatMessageType, type AIInsight } from "@/api/ai";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AIAdvisor() {
-  const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [localMessages, setLocalMessages] = useState<ChatMessageType[]>([]);
 
   // Get AI insight
-  const { data: insight } = useQuery({
-    queryKey: ['/api/ai/insight'],
-    queryFn: async () => {
-      const res = await apiRequest('GET', '/api/ai/insight');
-      return res.json();
+  const { 
+    data: insight, 
+    isLoading: isInsightLoading,
+    error: insightError
+  } = useQuery<AIInsight>({
+    queryKey: ['/api/ai/insights'],
+    queryFn: fetchAIInsight,
+    staleTime: 5 * 60 * 1000 // 5 minutes
+  });
+
+  // Get chat history
+  const {
+    data: chatHistory,
+    isLoading: isHistoryLoading
+  } = useQuery<ChatMessageType[]>({
+    queryKey: ['/api/ai/chat-history'],
+    queryFn: fetchChatHistory,
+    onSuccess: (data) => {
+      // Only set messages from the server if we don't have local messages yet
+      if (localMessages.length === 0 && data.length > 0) {
+        setLocalMessages(data);
+      }
     }
   });
 
   // AI chat mutation
   const chatMutation = useMutation({
-    mutationFn: async (message: string) => {
-      const res = await apiRequest('POST', '/api/ai/chat', { message });
-      return res.json();
-    },
+    mutationFn: sendChatMessage,
     onSuccess: (data) => {
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
+      // Add the assistant response
+      const assistantMessage: ChatMessageType = {
+        id: `assistant-${Date.now()}`,
         content: data.response,
         role: "assistant",
-        timestamp: new Date()
-      }]);
+        timestamp: new Date().toISOString()
+      };
+      
+      setLocalMessages(prev => [...prev, assistantMessage]);
+      
+      // Invalidate chat history query to refresh on next fetch
+      queryClient.invalidateQueries({ queryKey: ['/api/ai/chat-history'] });
     }
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-    
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: input,
+  const handleSubmit = (message: string) => {
+    // Add user message to local state
+    const userMessage: ChatMessageType = {
+      id: `user-${Date.now()}`,
+      content: message,
       role: "user",
-      timestamp: new Date()
+      timestamp: new Date().toISOString()
     };
     
-    setMessages(prev => [...prev, userMessage]);
-    chatMutation.mutate(input);
-    setInput("");
+    setLocalMessages(prev => [...prev, userMessage]);
+    chatMutation.mutate(message);
   };
 
   // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [localMessages]);
+
+  const messages = localMessages.length > 0 ? localMessages : (chatHistory || []);
 
   return (
-    <Card className="bg-dark-700 border-dark-600">
+    <Card className="border">
       <CardHeader className="pb-2">
         <CardTitle className="text-xl flex items-center">
-          <Bot className="mr-2 h-5 w-5 text-primary-500" />
+          <Bot className="mr-2 h-5 w-5 text-primary" />
           AI Financial Advisor
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mb-2">
-          <p className="text-gray-300 text-sm mb-2">
-            {insight?.message || "Based on your portfolio, I recommend diversifying into tech stocks. Your current exposure to financial sector is high (45% of portfolio)."}
-          </p>
-          <Button variant="outline" size="sm" className="inline-flex items-center text-xs font-medium text-primary-400 hover:text-primary-300 bg-primary-400/10 border-none">
-            <Bot className="h-3 w-3 mr-1" />
-            AI Insight
-          </Button>
+        <div className="mb-4">
+          {isInsightLoading ? (
+            <Skeleton className="h-12 w-full" />
+          ) : insightError ? (
+            <p className="text-sm text-muted-foreground">Unable to get personalized insights now. Try again later.</p>
+          ) : (
+            <>
+              <p className="text-sm mb-2">
+                {insight?.message || "Connect your accounts to get personalized AI insights."}
+              </p>
+              <Button variant="outline" size="sm" className="inline-flex items-center text-xs font-medium">
+                <Bot className="h-3 w-3 mr-1" />
+                AI Insight {insight && `(${Math.round(insight.confidence * 100)}% confidence)`}
+              </Button>
+            </>
+          )}
         </div>
         
-        <div className="mt-4 border-t border-gray-800 pt-4">
-          <div className="h-48 overflow-y-auto mb-4 space-y-3 scrollbar-thin">
-            {messages.length === 0 ? (
-              <div className="text-center text-gray-400 py-8">
-                <Bot className="h-8 w-8 mx-auto mb-2 text-gray-500" />
+        <div className="mt-4 border-t pt-4">
+          <div className="h-48 overflow-y-auto mb-4 space-y-3 pr-1">
+            {isHistoryLoading && messages.length === 0 ? (
+              <>
+                <Skeleton className="h-16 w-3/4 mx-auto mb-2" />
+                <Skeleton className="h-16 w-3/4 mx-auto" />
+              </>
+            ) : messages.length === 0 ? (
+              <div className="text-center text-muted-foreground py-8">
+                <Bot className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
                 <p>No messages yet. Start a conversation!</p>
               </div>
             ) : (
@@ -99,30 +124,20 @@ export default function AIAdvisor() {
                   key={message.id}
                   message={message.content}
                   role={message.role}
-                  timestamp={message.timestamp}
+                  timestamp={new Date(message.timestamp)}
                 />
               ))
             )}
             <div ref={messagesEndRef} />
           </div>
           
-          <form onSubmit={handleSubmit} className="flex items-center">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="flex-1 bg-dark-800 text-white border border-gray-700 rounded-l-lg focus:outline-none focus:ring-1 focus:ring-primary-500"
-              placeholder="Ask me anything about your finances..."
-            />
-            <Button 
-              type="submit" 
-              className="bg-primary-600 rounded-r-lg p-2 text-white"
-              disabled={chatMutation.isPending}
-            >
-              <Send className="h-5 w-5" />
-            </Button>
-          </form>
-          <p className="text-xs text-gray-500 mt-2">
-            Your conversation is private and secure. You can ask about investment advice, budget optimization, or retirement planning.
+          <ChatInput 
+            onSendMessage={handleSubmit} 
+            isLoading={chatMutation.isPending}
+            placeholder="Ask me anything about your finances..."
+          />
+          <p className="text-xs text-muted-foreground mt-2">
+            Your conversation is private and secure. Ask about investment advice, tax planning, or retirement strategies.
           </p>
         </div>
         

@@ -1,45 +1,63 @@
 import { apiRequest } from "@/lib/queryClient";
 
 export interface Document {
-  id: string;
+  id: number;
   name: string;
   type: string;
   size: number;
-  uploadedAt: string;
-  analysisStatus: 'pending' | 'completed' | 'failed';
+  uploaded_at: string;
+  analysis_status: 'pending' | 'completed' | 'failed';
   analysis?: {
     summary: string;
     insights: string[];
   };
 }
 
+/**
+ * Fetch all user documents
+ * @returns Array of documents
+ */
 export async function fetchDocuments(): Promise<Document[]> {
-  const res = await apiRequest('GET', '/api/documents');
-  if (!res.ok) {
-    throw new Error('Failed to fetch documents');
-  }
-  return res.json();
+  const response = await apiRequest("GET", "/api/documents");
+  return await response.json();
 }
 
+/**
+ * Upload and analyze a document
+ * @param formData Form data with file
+ * @returns Uploaded document
+ */
 export async function uploadDocument(formData: FormData): Promise<Document> {
-  const res = await fetch('/api/documents/upload', {
-    method: 'POST',
-    body: formData,
-    credentials: 'include'
+  const response = await apiRequest("POST", "/api/documents", formData, {
+    isFormData: true,
   });
-  
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(error || 'Failed to upload document');
-  }
-  
-  return res.json();
+  return await response.json();
 }
 
-export async function getDocumentAnalysis(id: string): Promise<Document['analysis']> {
-  const res = await apiRequest('GET', `/api/documents/${id}/analysis`);
-  if (!res.ok) {
-    throw new Error('Failed to fetch document analysis');
+/**
+ * Get document analysis
+ * @param id Document ID
+ * @returns Document analysis or null if not found
+ */
+export async function getDocumentAnalysis(id: number): Promise<Document['analysis'] | null> {
+  try {
+    const response = await apiRequest("GET", `/api/documents/${id}/analysis`);
+    return await response.json();
+  } catch (error) {
+    return null;
   }
-  return res.json();
+}
+
+/**
+ * Delete a document
+ * @param id Document ID
+ * @returns True if deleted successfully
+ */
+export async function deleteDocument(id: number): Promise<boolean> {
+  try {
+    await apiRequest("DELETE", `/api/documents/${id}`);
+    return true;
+  } catch (error) {
+    return false;
+  }
 }

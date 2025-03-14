@@ -1,35 +1,66 @@
+"""
+Dependencies for FastAPI routes
+"""
+import os
 from datetime import datetime, timedelta
-from typing import Union, Any, Optional
+from typing import Optional, Union, Any, Dict
+
 import jwt
-from jwt.exceptions import PyJWTError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from pydantic import ValidationError
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from jwt.exceptions import PyJWTError
 
 from backend.database import get_db
 from backend.models.user import User
-from backend.config import settings
-from backend.security import create_access_token
+from backend.core.config import settings
 
-# OAuth2 scheme for token authentication
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/auth/token"
-)
+# OAuth2 password bearer scheme
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
+
+# Token model
+class TokenPayload(BaseModel):
+    """JWT token payload"""
+    sub: Optional[int] = None
+    exp: Optional[datetime] = None
+
+def create_access_token(subject: Union[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+    """
+    Create JWT access token
+    
+    Args:
+        subject: Token subject (usually user ID)
+        expires_delta: Token expiration time
+        
+    Returns:
+        Encoded JWT token
+    """
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
+    
+    to_encode = {"exp": expire, "sub": str(subject)}
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    
+    return encoded_jwt
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ) -> User:
     """
-    Get current user from JWT token
+    Get current authenticated user from JWT token
     
     Args:
         token: JWT token
         db: Database session
         
     Returns:
-        User object
+        Current authenticated user
         
     Raises:
         HTTPException: If token is invalid or user not found
@@ -38,22 +69,31 @@ async def get_current_user(
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
-        user_id: str = payload.get("sub")
-        if user_id is None:
+        
+        token_data = TokenPayload(**payload)
+        
+        if token_data.exp and datetime.fromtimestamp(token_data.exp) < datetime.now():
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate credentials",
+                detail="Token expired",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
-    except (PyJWTError, ValidationError):
+    except PyJWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    user_id = token_data.sub
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -63,30 +103,9 @@ async def get_current_user(
     
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Inactive user"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Inactive user",
+            headers={"WWW-Authenticate": "Bearer"},
         )
     
     return user
-
-async def get_optional_current_user(
-    token: Optional[str] = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
-) -> Optional[User]:
-    """
-    Get current user if token is valid, otherwise return None
-    
-    Args:
-        token: JWT token (optional)
-        db: Database session
-        
-    Returns:
-        User object or None
-    """
-    if not token:
-        return None
-    
-    try:
-        return await get_current_user(token=token, db=db)
-    except HTTPException:
-        return None

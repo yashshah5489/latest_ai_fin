@@ -11,7 +11,9 @@ import ReportsPage from "@/pages/reports-page";
 import AIAdvisorPage from "@/pages/ai-advisor-page";
 import RiskAnalysisPage from "@/pages/risk-analysis-page";
 import ProfilePage from "@/pages/profile-page";
+import DocumentsPage from "@/pages/documents-page";
 import { ProtectedRoute } from "./lib/protected-route";
+import { AuthProvider } from "@/hooks/use-auth";
 
 function Router() {
   return (
@@ -22,6 +24,7 @@ function Router() {
       <ProtectedRoute path="/budget" component={BudgetPage} />
       <ProtectedRoute path="/reports" component={ReportsPage} />
       <ProtectedRoute path="/ai-advisor" component={AIAdvisorPage} />
+      <ProtectedRoute path="/documents" component={DocumentsPage} />
       <ProtectedRoute path="/risk-analysis" component={RiskAnalysisPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <Route component={NotFound} />
@@ -32,8 +35,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <AuthProvider>
+        <Router />
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

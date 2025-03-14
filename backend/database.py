@@ -1,26 +1,32 @@
-import logging
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+"""
+Database connection and session management
+"""
+import os
 from typing import Generator
 
-from backend.config import settings
+from sqlalchemy import create_engine, event
+from sqlalchemy.engine import Engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from backend.core.config import settings
 
-# Create SQLAlchemy engine
-engine = create_engine(
-    settings.DATABASE_URL, 
-    connect_args={"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {}
-)
+# Create engine
+engine = create_engine(settings.DATABASE_URL, connect_args={"check_same_thread": False})
 
-# Create SessionLocal class
+# Create sessionmaker
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Create base class for models
+# Create Base class for models
 Base = declarative_base()
+
+# Enable foreign key constraints for SQLite
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    """Enable foreign key constraints for SQLite"""
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 def get_db() -> Generator[Session, None, None]:
     """Create new DB session for each request, close when done"""
@@ -32,15 +38,8 @@ def get_db() -> Generator[Session, None, None]:
 
 def init_db() -> None:
     """Initialize database tables"""
-    try:
-        # Import all models here to ensure they are registered
-        from backend.models.user import User
-        from backend.models.document import Document
-        from backend.models.risk_analysis import RiskAnalysis
-        
-        # Create tables
-        Base.metadata.create_all(bind=engine)
-        logger.info("Database tables created successfully")
-    except Exception as e:
-        logger.error(f"Error initializing database: {str(e)}")
-        raise
+    # Import models to ensure they are registered with the Base class
+    from backend.models import user, document, risk_analysis
+    
+    # Create tables
+    Base.metadata.create_all(bind=engine)

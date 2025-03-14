@@ -1,33 +1,36 @@
-import datetime
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, JSON
+"""
+Risk analysis model for SQLAlchemy
+"""
+from datetime import datetime
+from typing import Optional, Dict, Any
+
+from sqlalchemy import Column, Integer, String, DateTime, Float, JSON, ForeignKey
 from sqlalchemy.orm import relationship
 
 from backend.database import Base
 
 class RiskAnalysis(Base):
-    """Database model for risk analysis"""
+    """Risk analysis model"""
     __tablename__ = "risk_analyses"
     
     id = Column(Integer, primary_key=True, index=True)
-    
-    # Input data
     age = Column(Integer, nullable=False)
-    investment_horizon = Column(Integer, nullable=False)  # in years
-    risk_tolerance = Column(Integer, nullable=False)  # scale 1-10
-    emergency_fund = Column(Integer, nullable=False)  # in months
-    income_stability = Column(Integer, nullable=False)  # scale 1-10
+    investment_horizon = Column(Integer, nullable=False)
+    risk_tolerance = Column(Integer, nullable=False)
+    emergency_fund = Column(Integer, nullable=False)
+    income_stability = Column(Integer, nullable=False)
     
     # Analysis results
-    risk_score = Column(Float, nullable=True)
-    risk_category = Column(String, nullable=True)
-    asset_allocation = Column(JSON, nullable=True)  # distribution of assets
-    recommendations = Column(JSON, nullable=True)  # list of recommendations
+    risk_score = Column(Float, nullable=False)
+    risk_category = Column(String, nullable=False)
+    asset_allocation = Column(JSON, nullable=False)  # Dict with allocation percentages
+    recommendations = Column(JSON, nullable=False)  # List of recommendations
     
-    # Metadata
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow)
     
     # Foreign keys
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     
     # Relationships
-    owner = relationship("User", back_populates="risk_analyses")
+    user = relationship("User", back_populates="risk_analyses")

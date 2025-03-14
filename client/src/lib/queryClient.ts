@@ -7,15 +7,38 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+interface ApiRequestOptions {
+  isFormData?: boolean;
+}
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
+  options?: ApiRequestOptions
 ): Promise<Response> {
+  const isFormData = options?.isFormData || false;
+  
+  // Configure headers and body based on data type
+  let headers = {};
+  let body: any = undefined;
+  
+  if (data) {
+    if (isFormData) {
+      // FormData is already properly formatted
+      body = data as FormData;
+      // No Content-Type header for FormData (browser sets it with boundary)
+    } else {
+      // JSON data
+      headers = { "Content-Type": "application/json" };
+      body = JSON.stringify(data);
+    }
+  }
+  
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
+    headers,
+    body,
     credentials: "include",
   });
 

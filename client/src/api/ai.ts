@@ -12,26 +12,30 @@ export interface AIInsight {
   confidence: number;
 }
 
-export async function sendChatMessage(message: string): Promise<{ response: string }> {
-  const res = await apiRequest('POST', '/api/ai/chat', { message });
-  if (!res.ok) {
-    throw new Error('Failed to send message');
-  }
-  return res.json();
+/**
+ * Send a chat message to the AI advisor
+ * @param message The message text
+ * @returns The AI response
+ */
+export async function sendChatMessage(message: string): Promise<{response: string}> {
+  const response = await apiRequest("POST", "/api/ai/chat", { message });
+  return await response.json();
 }
 
+/**
+ * Fetch chat history with AI advisor
+ * @returns Array of chat messages
+ */
 export async function fetchChatHistory(): Promise<ChatMessage[]> {
-  const res = await apiRequest('GET', '/api/ai/chat/history');
-  if (!res.ok) {
-    throw new Error('Failed to fetch chat history');
-  }
-  return res.json();
+  const response = await apiRequest("GET", "/api/ai/chat-history");
+  return await response.json();
 }
 
+/**
+ * Get an AI-generated financial insight
+ * @returns AI insight with message and confidence
+ */
 export async function fetchAIInsight(): Promise<AIInsight> {
-  const res = await apiRequest('GET', '/api/ai/insight');
-  if (!res.ok) {
-    throw new Error('Failed to fetch AI insight');
-  }
-  return res.json();
+  const response = await apiRequest("GET", "/api/ai/insights");
+  return await response.json();
 }

@@ -3,241 +3,229 @@
 {% block title %}Dashboard - Smart AI Financial Analyzer{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4" id="dashboard-overview">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="mb-4">Financial Dashboard</h1>
-            <p class="text-muted">Welcome back, {{ request.user.full_name or request.user.username }}! Here's your financial overview.</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Financial Dashboard</h1>
+    <div>
+        <span class="text-muted me-2">Last updated:</span>
+        <span class="badge bg-secondary">{{ now('utc') | date }}</span>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-6 col-xl-3 mb-4">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-muted mb-1">Total Balance</h6>
+                        <h3 class="mb-2">{{ dashboard.total_balance | currency }}</h3>
+                        <div class="d-flex align-items-center">
+                            <span class="badge {{ dashboard.balance_change >= 0 ? 'bg-success' : 'bg-danger' }} me-1">
+                                <i class="bi {{ dashboard.balance_change >= 0 ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
+                                {{ dashboard.balance_change | percentage }}
+                            </span>
+                            <span class="text-muted small">vs last month</span>
+                        </div>
+                    </div>
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                        <i class="bi bi-wallet2 text-primary"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
-            <div class="card stat-card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Balance</h6>
-                            <h3 class="mb-0">₹{{ dashboard_data.totalBalance|format_currency }}</h3>
-                            {% if dashboard_data.balanceChange > 0 %}
-                                <span class="badge bg-success">+{{ dashboard_data.balanceChange }}%</span>
-                            {% else %}
-                                <span class="badge bg-danger">{{ dashboard_data.balanceChange }}%</span>
-                            {% endif %}
-                        </div>
-                        <div class="stat-icon {% if dashboard_data.balanceChange > 0 %}positive{% else %}negative{% endif %}">
-                            <i class="fas fa-wallet"></i>
+    <div class="col-md-6 col-xl-3 mb-4">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-muted mb-1">Total Investments</h6>
+                        <h3 class="mb-2">{{ dashboard.total_investments | currency }}</h3>
+                        <div class="d-flex align-items-center">
+                            <span class="badge {{ dashboard.investments_change >= 0 ? 'bg-success' : 'bg-danger' }} me-1">
+                                <i class="bi {{ dashboard.investments_change >= 0 ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
+                                {{ dashboard.investments_change | percentage }}
+                            </span>
+                            <span class="text-muted small">vs last month</span>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
-            <div class="card stat-card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Investments</h6>
-                            <h3 class="mb-0">₹{{ dashboard_data.totalInvestments|format_currency }}</h3>
-                            {% if dashboard_data.investmentsChange > 0 %}
-                                <span class="badge bg-success">+{{ dashboard_data.investmentsChange }}%</span>
-                            {% else %}
-                                <span class="badge bg-danger">{{ dashboard_data.investmentsChange }}%</span>
-                            {% endif %}
-                        </div>
-                        <div class="stat-icon {% if dashboard_data.investmentsChange > 0 %}positive{% else %}negative{% endif %}">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
-            <div class="card stat-card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Monthly Expenses</h6>
-                            <h3 class="mb-0">₹{{ dashboard_data.monthlyExpenses|format_currency }}</h3>
-                            {% if dashboard_data.expensesChange < 0 %}
-                                <span class="badge bg-success">{{ dashboard_data.expensesChange }}%</span>
-                            {% else %}
-                                <span class="badge bg-danger">+{{ dashboard_data.expensesChange }}%</span>
-                            {% endif %}
-                        </div>
-                        <div class="stat-icon {% if dashboard_data.expensesChange < 0 %}positive{% else %}negative{% endif %}">
-                            <i class="fas fa-shopping-cart"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-3 col-sm-6">
-            <div class="card stat-card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Portfolio Growth</h6>
-                            <h3 class="mb-0">{{ dashboard_data.portfolioGrowth }}%</h3>
-                            {% if dashboard_data.growthChange > 0 %}
-                                <span class="badge bg-success">+{{ dashboard_data.growthChange }}%</span>
-                            {% else %}
-                                <span class="badge bg-danger">{{ dashboard_data.growthChange }}%</span>
-                            {% endif %}
-                        </div>
-                        <div class="stat-icon {% if dashboard_data.growthChange > 0 %}positive{% else %}negative{% endif %}">
-                            <i class="fas fa-chart-pie"></i>
-                        </div>
+                    <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                        <i class="bi bi-graph-up-arrow text-success"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Charts and AI Insight -->
-    <div class="row mb-4">
-        <div class="col-lg-8">
-            <div class="row">
-                <!-- Portfolio Distribution -->
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="mb-0">Portfolio Distribution</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container" style="height: 250px;">
-                                <canvas id="portfolio-distribution-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Income/Expense Trend -->
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="mb-0">Income vs Expenses (₹)</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container" style="height: 250px;">
-                                <canvas id="income-expense-chart"></canvas>
-                            </div>
+
+    <div class="col-md-6 col-xl-3 mb-4">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-muted mb-1">Monthly Expenses</h6>
+                        <h3 class="mb-2">{{ dashboard.monthly_expenses | currency }}</h3>
+                        <div class="d-flex align-items-center">
+                            <span class="badge {{ dashboard.expenses_change <= 0 ? 'bg-success' : 'bg-danger' }} me-1">
+                                <i class="bi {{ dashboard.expenses_change <= 0 ? 'bi-arrow-down' : 'bi-arrow-up' }}"></i>
+                                {{ (dashboard.expenses_change * -1 if dashboard.expenses_change < 0 else dashboard.expenses_change) | percentage }}
+                            </span>
+                            <span class="text-muted small">vs last month</span>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <!-- Investment Overview -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Investment Overview</h5>
-                            <a href="/investments" class="btn btn-sm btn-outline-primary">View All</a>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Investment</th>
-                                            <th>Type</th>
-                                            <th class="text-end">Value (₹)</th>
-                                            <th class="text-end">Allocation</th>
-                                            <th class="text-end">Return</th>
-                                            <th>Risk Level</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for investment in investments[:5] %}
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="me-2"><i class="{{ investment.icon }}"></i></div>
-                                                    {{ investment.name }}
-                                                </div>
-                                            </td>
-                                            <td>{{ investment.type }}</td>
-                                            <td class="text-end">₹{{ investment.value|format_currency }}</td>
-                                            <td class="text-end">{{ investment.allocation }}%</td>
-                                            <td class="text-end {% if investment.return > 0 %}text-success{% else %}text-danger{% endif %}">
-                                                {% if investment.return > 0 %}+{% endif %}{{ investment.return }}%
-                                            </td>
-                                            <td>
-                                                {% if investment.riskLevel == 'Low' %}
-                                                <span class="badge bg-success">Low</span>
-                                                {% elif investment.riskLevel == 'Medium' %}
-                                                <span class="badge bg-warning">Medium</span>
-                                                {% else %}
-                                                <span class="badge bg-danger">High</span>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <div class="rounded-circle bg-danger bg-opacity-10 p-3">
+                        <i class="bi bi-cash-stack text-danger"></i>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div class="col-lg-4">
-            <!-- AI Insight -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">AI Financial Insight</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="me-3 rounded-circle bg-primary p-2 text-white">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0">AI Advisor</h6>
-                            <small class="text-muted">Powered by GROQ LLM</small>
+    </div>
+
+    <div class="col-md-6 col-xl-3 mb-4">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-muted mb-1">Portfolio Growth</h6>
+                        <h3 class="mb-2">{{ dashboard.portfolio_growth | percentage }}</h3>
+                        <div class="d-flex align-items-center">
+                            <span class="badge {{ dashboard.growth_change >= 0 ? 'bg-success' : 'bg-danger' }} me-1">
+                                <i class="bi {{ dashboard.growth_change >= 0 ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
+                                {{ dashboard.growth_change | percentage }}
+                            </span>
+                            <span class="text-muted small">vs last month</span>
                         </div>
                     </div>
-                    
-                    <p class="mb-3">{{ ai_insight.message }}</p>
-                    
-                    <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">Confidence: {{ ai_insight.confidence }}%</small>
-                        <a href="/ai-advisor" class="btn btn-sm btn-primary">Chat with AI</a>
+                    <div class="rounded-circle bg-info bg-opacity-10 p-3">
+                        <i class="bi bi-arrow-up-right-circle text-info"></i>
                     </div>
-                </div>
-            </div>
-            
-            <!-- Financial News -->
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Financial News</h5>
-                    <span class="badge bg-primary">India Focus</span>
-                </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        {% for news in news_items[:4] %}
-                        <li class="list-group-item border-bottom">
-                            <h6 class="mb-1">{{ news.title }}</h6>
-                            <p class="mb-1 small">{{ news.description[:100] }}{% if news.description|length > 100 %}...{% endif %}</p>
-                            <div class="d-flex justify-content-between">
-                                <small class="text-muted">{{ news.source }}</small>
-                                <a href="{{ news.url }}" target="_blank" class="btn btn-sm btn-link p-0">Read More</a>
-                            </div>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                <div class="card-footer text-center">
-                    <a href="https://www.moneycontrol.com/" target="_blank" class="btn btn-sm btn-outline-primary">View More News</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<div class="row">
+    <!-- Investment Overview -->
+    <div class="col-lg-8 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Investment Overview</h5>
+                <a href="/investments" class="btn btn-sm btn-outline-secondary">View All</a>
+            </div>
+            <div class="card-body">
+                <canvas id="investmentChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Insights -->
+    <div class="col-lg-4 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">AI Insight</h5>
+                <a href="/ai-advisor" class="btn btn-sm btn-outline-secondary">Ask AI</a>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <div class="bg-primary bg-opacity-10 rounded-3 p-3 mb-3">
+                    <p class="mb-0">{{ insight.message }}</p>
+                </div>
+                <div class="d-flex align-items-center mt-auto">
+                    <div class="d-flex align-items-center me-3">
+                        <i class="bi bi-robot text-primary me-2"></i>
+                        <span>AI-generated insight</span>
+                    </div>
+                    <div class="ms-auto">
+                        <div class="progress" style="height: 6px; width: 80px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ insight.confidence * 100 }}%"></div>
+                        </div>
+                        <span class="small text-muted">{{ (insight.confidence * 100) | round }}% confidence</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial News -->
+    <div class="col-12 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0">Financial News</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for item in news[:4] %}
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="rounded bg-secondary bg-opacity-10 p-2 text-center" style="width: 48px; height: 48px;">
+                                    <i class="bi bi-newspaper"></i>
+                                </div>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="mb-1">{{ item.title | truncate(60) }}</h6>
+                                <p class="text-muted small mb-1">{{ item.description | truncate(100) }}</p>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-light text-dark me-2">{{ item.source }}</span>
+                                    <small class="text-muted">{{ item.publishedAt | date }}</small>
+                                    <a href="{{ item.url }}" target="_blank" class="ms-auto btn btn-sm btn-link">Read</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize investment chart
+        const ctx = document.getElementById('investmentChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Equity', 'Mutual Funds', 'Fixed Deposits', 'Gold', 'Bonds', 'Others'],
+                datasets: [{
+                    data: [40, 25, 15, 10, 5, 5],
+                    backgroundColor: [
+                        '#6366f1', // Primary
+                        '#8b5cf6', // Secondary
+                        '#10b981', // Success
+                        '#f59e0b', // Warning
+                        '#ef4444', // Danger
+                        '#94a3b8'  // Muted
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            color: '#d1d5db'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

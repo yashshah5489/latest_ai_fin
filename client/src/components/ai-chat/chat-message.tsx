@@ -1,5 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Bot, User } from "lucide-react";
 
 interface ChatMessageProps {
   message: string;
@@ -12,25 +13,35 @@ export default function ChatMessage({
   role,
   timestamp
 }: ChatMessageProps) {
+  const isAssistant = role === "assistant";
+  
   return (
     <div className={cn(
-      "p-3 max-w-[80%]",
-      role === "assistant" 
-        ? "chat-bubble-ai bg-dark-600 rounded-tr-xl rounded-br-xl rounded-bl-xl" 
-        : "chat-bubble-user ml-auto bg-primary-600 rounded-tl-xl rounded-tr-xl rounded-bl-xl"
+      "p-3 max-w-[85%] rounded-lg flex gap-2",
+      isAssistant 
+        ? "bg-accent/50" 
+        : "ml-auto bg-primary/10"
     )}>
-      <p className={cn(
-        "text-sm",
-        role === "assistant" ? "text-gray-200" : "text-white"
-      )}>
-        {message}
-      </p>
-      <p className={cn(
-        "text-xs mt-1",
-        role === "assistant" ? "text-gray-400" : "text-gray-300"
-      )}>
-        {formatDistanceToNow(timestamp, { addSuffix: true })}
-      </p>
+      {isAssistant && (
+        <div className="flex-shrink-0 rounded-full bg-primary/10 h-6 w-6 flex items-center justify-center">
+          <Bot className="h-3.5 w-3.5 text-primary" />
+        </div>
+      )}
+      
+      <div className="flex-1 space-y-1">
+        <p className="text-sm whitespace-pre-wrap break-words">
+          {message}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {formatDistanceToNow(timestamp, { addSuffix: true })}
+        </p>
+      </div>
+      
+      {!isAssistant && (
+        <div className="flex-shrink-0 rounded-full bg-primary/20 h-6 w-6 flex items-center justify-center">
+          <User className="h-3.5 w-3.5 text-primary" />
+        </div>
+      )}
     </div>
   );
 }

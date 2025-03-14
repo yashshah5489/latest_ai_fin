@@ -1,72 +1,86 @@
-from fastapi import APIRouter, Depends, Body
+"""
+AI router for financial advisor functionality
+"""
+from typing import List, Dict, Any
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Dict, Any, List
+from pydantic import BaseModel
 
 from backend.database import get_db
-from backend.models.user import User
 from backend.services.ai_service import ai_service
 from api.dependencies import get_current_user
 
-router = APIRouter(
-    prefix="/api/v1/ai",
-    tags=["ai"],
-    responses={401: {"description": "Not authenticated"}},
-)
+router = APIRouter(prefix="/ai", tags=["ai"])
 
-@router.post("/chat")
-async def chat_with_ai(
-    message: str = Body(..., embed=True),
-    current_user: User = Depends(get_current_user),
+class ChatMessage(BaseModel):
+    """Chat message model"""
+    id: str
+    content: str
+    role: str
+    timestamp: str
+
+class AIInsight(BaseModel):
+    """AI insight model"""
+    message: str
+    confidence: float
+
+class ChatRequest(BaseModel):
+    """Chat request model"""
+    message: str
+
+@router.get("/insights", response_model=AIInsight)
+async def get_ai_insight(
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Chat with the AI financial advisor
+    Get AI-generated financial insight
     
     Args:
-        message: User's message to the AI
+        current_user: Current authenticated user
+        db: Database session
+        
+    Returns:
+        AI insight
+    """
+    insight = await ai_service.get_financial_insight(current_user.id)
+    return insight
+
+@router.get("/chat-history", response_model=List[ChatMessage])
+async def get_chat_history(
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get chat history with AI advisor
+    
+    Args:
+        current_user: Current authenticated user
+        db: Database session
+        
+    Returns:
+        List of chat messages
+    """
+    history = await ai_service.get_chat_history(current_user.id)
+    return history
+
+@router.post("/chat", response_model=Dict[str, str])
+async def chat_with_ai(
+    request: ChatRequest,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Chat with AI financial advisor
+    
+    Args:
+        request: Chat request with message
+        current_user: Current authenticated user
+        db: Database session
         
     Returns:
         AI response
     """
-    # Get chat history from database (simplified - in real implementation you'd retrieve actual history)
-    # This would need to be implemented in your database layer
-    chat_history = []  # You would retrieve this from the database
-    
-    # Get response from AI service
-    response = await ai_service.chat_with_ai(message, chat_history)
-    
-    # Save the conversation to database (simplified)
-    # This would need to be implemented in your database layer
-    # db.save_chat_message(user_id=current_user.id, user_message=message, ai_response=response)
-    
+    response = await ai_service.chat_with_ai(request.message, user_id=current_user.id)
     return {"response": response}
-
-@router.get("/insight")
-async def get_financial_insight(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Get personalized financial insight from AI
-    
-    Returns:
-        AI generated financial insight
-    """
-    # In a real implementation, you would gather this data from the user's profile
-    # This is a simplified example
-    user_data = {
-        "age": 35,
-        "income": 1200000,  # ₹12 lakh per annum
-        "savings": 500000,  # ₹5 lakh
-        "debt": 200000,     # ₹2 lakh
-        "investments": {
-            "equity": 300000,    # ₹3 lakh
-            "fixedIncome": 200000,  # ₹2 lakh
-            "gold": 100000,      # ₹1 lakh
-        },
-        "goals": ["home", "retirement", "children_education"],
-        "risk_profile": "moderate",
-    }
-    
-    insight = await ai_service.get_financial_insight(user_data)
-    return insight

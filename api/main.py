@@ -1,103 +1,64 @@
+"""
+Main API application module
+"""
 import os
-from fastapi import FastAPI, Request, Depends, HTTPException
+
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordBearer
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from typing import List
-import logging
-import jwt
-from jwt.exceptions import PyJWTError
-import uvicorn
+from pydantic import ValidationError
+from starlette.middleware.cors import CORSMiddleware
 
-from api.routers import auth, news, ai, documents, risk
-from backend.database import get_db, init_db
-from backend.config import settings
+from backend.core.config import settings
+from backend.database import init_db
+from api.routers import auth, ai, news, documents, risk, investments, users
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Create FastAPI application
+# Initialize FastAPI application
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description=settings.DESCRIPTION,
     version=settings.VERSION,
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json"
 )
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins
+    allow_origins=["*"],  # In production, restrict this to your frontend URLs
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# Create uploads directory if it doesn't exist
-os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-
-# Mount static files
-app.mount("/static", StaticFiles(directory=settings.STATIC_DIR), name="static")
-
-# Initialize Jinja2 templates
-templates = Jinja2Templates(directory=settings.TEMPLATES_DIR)
-
 # Include routers
-app.include_router(auth.router, prefix=settings.API_V1_STR)
-app.include_router(news.router)
-app.include_router(ai.router)
-app.include_router(documents.router)
-app.include_router(risk.router)
+app.include_router(auth.router, prefix="/api")
+app.include_router(ai.router, prefix="/api")
+app.include_router(news.router, prefix="/api")
+app.include_router(documents.router, prefix="/api")
+app.include_router(risk.router, prefix="/api")
+app.include_router(investments.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
 
-# Exception handler for generic exceptions
-@app.exception_handler(Exception)
-async def generic_exception_handler(request: Request, exc: Exception):
+# Exception handlers
+@app.exception_handler(ValidationError)
+async def validation_exception_handler(request: Request, exc: ValidationError):
+    """Handle Pydantic validation errors"""
     return JSONResponse(
-        status_code=500,
-        content={"detail": f"Internal Server Error: {str(exc)}"},
+        status_code=422,
+        content={"detail": exc.errors()},
     )
 
-# Exception handler for JWT exceptions
-@app.exception_handler(PyJWTError)
-async def jwt_exception_handler(request: Request, exc: PyJWTError):
-    return JSONResponse(
-        status_code=401,
-        content={"detail": "Invalid authentication credentials"},
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-# Root endpoint
-@app.get("/")
-async def root():
-    return {
-        "message": "Welcome to Smart AI Financial Analyzer API",
-        "version": settings.VERSION,
-        "docs_url": "/docs",
-    }
-
-# Health check endpoint
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
-
-# Initialize database on startup
+# Application startup event
 @app.on_event("startup")
 async def startup_event():
-    try:
-        init_db()
-        logger.info("Database initialized successfully")
-    except Exception as e:
-        logger.error(f"Error initializing database: {str(e)}")
-        raise
+    """Initialize database on startup"""
+    init_db()
+    # Create upload directory if it doesn't exist
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 
-if __name__ == "__main__":
-    # Run server
-    uvicorn.run(
-        "api.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-    )
+# Health check endpoint
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "ok", "version": settings.VERSION}

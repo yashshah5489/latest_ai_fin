@@ -1,13 +1,15 @@
 import { useState } from "react";
 import Sidebar from "@/components/layout/sidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Loader2, Shield } from "lucide-react";
+import { Loader2, Shield, Info, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface RiskProfileData {
   age: number;
@@ -72,28 +74,49 @@ export default function RiskAnalysisPage() {
     riskAnalysisMutation.mutate(riskData);
   };
 
+  // Get color based on risk score
+  const getRiskColor = (score: number) => {
+    if (score < 30) return "bg-green-500";
+    if (score < 60) return "bg-amber-500";
+    return "bg-red-500";
+  };
+
   return (
-    <div className="flex h-screen overflow-hidden bg-dark-800 text-white">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar />
       
       <main className="flex-1 overflow-y-auto">
-        <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-          <h1 className="text-2xl font-heading font-bold">Risk Analysis</h1>
-          <p className="text-gray-400">Assess your risk profile and get investment recommendations.</p>
+        <div className="container mx-auto px-4 py-8 space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Risk Analysis</h1>
+            <p className="text-muted-foreground">Assess your risk profile and get investment recommendations.</p>
+          </div>
+          
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertTitle>Personalized Analysis</AlertTitle>
+            <AlertDescription>
+              This tool analyzes your risk tolerance based on your financial situation and 
+              provides personalized asset allocation recommendations suitable for the Indian market.
+            </AlertDescription>
+          </Alert>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-dark-700 border-dark-600">
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Shield className="mr-2 h-5 w-5 text-primary-500" />
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-primary" />
                   Your Risk Profile
                 </CardTitle>
+                <CardDescription>
+                  Adjust the parameters to match your financial situation
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <Label htmlFor="age">Age: {riskData.age}</Label>
-                    <span className="text-sm text-gray-400">Years</span>
+                    <Label htmlFor="age" className="text-sm font-medium">Age: {riskData.age}</Label>
+                    <span className="text-xs text-muted-foreground">Years</span>
                   </div>
                   <Slider
                     id="age"
@@ -102,14 +125,13 @@ export default function RiskAnalysisPage() {
                     step={1}
                     value={[riskData.age]}
                     onValueChange={(value) => handleSliderChange('age', value)}
-                    className="cursor-pointer"
                   />
                 </div>
                 
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <Label htmlFor="investmentHorizon">Investment Horizon: {riskData.investmentHorizon}</Label>
-                    <span className="text-sm text-gray-400">Years</span>
+                    <Label htmlFor="investmentHorizon" className="text-sm font-medium">Investment Horizon: {riskData.investmentHorizon}</Label>
+                    <span className="text-xs text-muted-foreground">Years</span>
                   </div>
                   <Slider
                     id="investmentHorizon"
@@ -118,14 +140,13 @@ export default function RiskAnalysisPage() {
                     step={1}
                     value={[riskData.investmentHorizon]}
                     onValueChange={(value) => handleSliderChange('investmentHorizon', value)}
-                    className="cursor-pointer"
                   />
                 </div>
                 
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <Label htmlFor="riskTolerance">Risk Tolerance: {riskData.riskTolerance}%</Label>
-                    <span className="text-sm text-gray-400">Low → High</span>
+                    <Label htmlFor="riskTolerance" className="text-sm font-medium">Risk Tolerance: {riskData.riskTolerance}%</Label>
+                    <span className="text-xs text-muted-foreground">Low → High</span>
                   </div>
                   <Slider
                     id="riskTolerance"
@@ -134,14 +155,13 @@ export default function RiskAnalysisPage() {
                     step={5}
                     value={[riskData.riskTolerance]}
                     onValueChange={(value) => handleSliderChange('riskTolerance', value)}
-                    className="cursor-pointer"
                   />
                 </div>
                 
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <Label htmlFor="emergencyFund">Emergency Fund: {riskData.emergencyFund}</Label>
-                    <span className="text-sm text-gray-400">Months of expenses</span>
+                    <Label htmlFor="emergencyFund" className="text-sm font-medium">Emergency Fund: {riskData.emergencyFund}</Label>
+                    <span className="text-xs text-muted-foreground">Months of expenses</span>
                   </div>
                   <Slider
                     id="emergencyFund"
@@ -150,14 +170,13 @@ export default function RiskAnalysisPage() {
                     step={1}
                     value={[riskData.emergencyFund]}
                     onValueChange={(value) => handleSliderChange('emergencyFund', value)}
-                    className="cursor-pointer"
                   />
                 </div>
                 
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <Label htmlFor="incomeStability">Income Stability: {riskData.incomeStability}%</Label>
-                    <span className="text-sm text-gray-400">Unstable → Stable</span>
+                    <Label htmlFor="incomeStability" className="text-sm font-medium">Income Stability: {riskData.incomeStability}%</Label>
+                    <span className="text-xs text-muted-foreground">Unstable → Stable</span>
                   </div>
                   <Slider
                     id="incomeStability"
@@ -166,7 +185,6 @@ export default function RiskAnalysisPage() {
                     step={5}
                     value={[riskData.incomeStability]}
                     onValueChange={(value) => handleSliderChange('incomeStability', value)}
-                    className="cursor-pointer"
                   />
                 </div>
                 
@@ -187,43 +205,51 @@ export default function RiskAnalysisPage() {
               </CardContent>
             </Card>
             
-            <Card className="bg-dark-700 border-dark-600">
+            <Card>
               <CardHeader>
                 <CardTitle>Analysis Results</CardTitle>
+                <CardDescription>
+                  Your personalized risk assessment and recommendations
+                </CardDescription>
               </CardHeader>
               <CardContent>
+                {riskAnalysisMutation.isError && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>
+                      Failed to analyze risk profile. Please try again.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
                 {result ? (
                   <div className="space-y-6">
-                    <div className="text-center p-4 bg-dark-800 rounded-lg">
-                      <h3 className="text-lg font-medium text-gray-300 mb-2">Risk Score</h3>
-                      <div className="relative h-4 bg-dark-600 rounded-full overflow-hidden mb-2">
+                    <div className="text-center p-6 bg-muted/50 rounded-lg">
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Risk Score</h3>
+                      <div className="relative h-2 bg-muted rounded-full overflow-hidden mb-3">
                         <div 
-                          className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500" 
-                          style={{ width: `${result.riskScore}%` }}
+                          className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-500 via-amber-500 to-red-500" 
+                          style={{ width: '100%' }}
                         ></div>
                         <div 
-                          className="absolute top-0 h-full w-1 bg-white" 
-                          style={{ left: `${result.riskScore}%`, transform: 'translateX(-50%)' }}
+                          className="absolute top-0 h-6 w-1 bg-foreground" 
+                          style={{ left: `${result.riskScore}%`, transform: 'translateX(-50%) translateY(-25%)' }}
                         ></div>
                       </div>
-                      <p className="text-2xl font-bold text-white">{result.riskScore}/100</p>
-                      <p className="text-primary-400 font-medium">{result.riskCategory} Risk Profile</p>
+                      <p className="text-3xl font-bold">{result.riskScore}/100</p>
+                      <p className="text-primary font-medium">{result.riskCategory} Risk Profile</p>
                     </div>
                     
                     <div>
-                      <h3 className="text-lg font-medium text-white mb-3">Recommended Asset Allocation</h3>
+                      <h3 className="text-sm font-medium mb-3">Recommended Asset Allocation</h3>
                       <div className="space-y-3">
                         <div>
                           <div className="flex justify-between text-sm mb-1">
                             <span>Equities</span>
                             <span>{result.assetAllocation.equities}%</span>
                           </div>
-                          <div className="h-2 bg-dark-800 rounded-full">
-                            <div 
-                              className="h-2 bg-blue-500 rounded-full" 
-                              style={{ width: `${result.assetAllocation.equities}%` }}
-                            ></div>
-                          </div>
+                          <Progress value={result.assetAllocation.equities} className="h-2" />
                         </div>
                         
                         <div>
@@ -231,12 +257,7 @@ export default function RiskAnalysisPage() {
                             <span>Fixed Income</span>
                             <span>{result.assetAllocation.fixedIncome}%</span>
                           </div>
-                          <div className="h-2 bg-dark-800 rounded-full">
-                            <div 
-                              className="h-2 bg-green-500 rounded-full" 
-                              style={{ width: `${result.assetAllocation.fixedIncome}%` }}
-                            ></div>
-                          </div>
+                          <Progress value={result.assetAllocation.fixedIncome} className="h-2" />
                         </div>
                         
                         <div>
@@ -244,12 +265,7 @@ export default function RiskAnalysisPage() {
                             <span>Gold</span>
                             <span>{result.assetAllocation.gold}%</span>
                           </div>
-                          <div className="h-2 bg-dark-800 rounded-full">
-                            <div 
-                              className="h-2 bg-yellow-500 rounded-full" 
-                              style={{ width: `${result.assetAllocation.gold}%` }}
-                            ></div>
-                          </div>
+                          <Progress value={result.assetAllocation.gold} className="h-2" />
                         </div>
                         
                         <div>
@@ -257,36 +273,32 @@ export default function RiskAnalysisPage() {
                             <span>Cash</span>
                             <span>{result.assetAllocation.cash}%</span>
                           </div>
-                          <div className="h-2 bg-dark-800 rounded-full">
-                            <div 
-                              className="h-2 bg-gray-500 rounded-full" 
-                              style={{ width: `${result.assetAllocation.cash}%` }}
-                            ></div>
-                          </div>
+                          <Progress value={result.assetAllocation.cash} className="h-2" />
                         </div>
                       </div>
                     </div>
                     
                     <div>
-                      <h3 className="text-lg font-medium text-white mb-3">Recommendations</h3>
-                      <ul className="space-y-2">
+                      <h3 className="text-sm font-medium mb-3">Recommendations</h3>
+                      <ul className="space-y-2 text-sm">
                         {result.recommendations.map((rec, index) => (
                           <li key={index} className="flex items-start">
-                            <span className="text-primary-500 mr-2">•</span>
-                            <span className="text-gray-300 text-sm">{rec}</span>
+                            <span className="text-primary mr-2 shrink-0">•</span>
+                            <span>{rec}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center p-12">
-                    <div className="w-24 h-24 rounded-full bg-dark-800 flex items-center justify-center text-primary-500 mb-4">
-                      <Shield className="h-12 w-12" />
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center text-primary mb-4">
+                      <Shield className="h-10 w-10" />
                     </div>
-                    <h3 className="text-xl font-medium text-white mb-2">No Analysis Yet</h3>
-                    <p className="text-gray-400 text-center">
-                      Adjust the sliders to match your financial situation and click "Analyze Risk Profile" to see your personalized recommendations.
+                    <h3 className="text-xl font-medium mb-2">No Analysis Yet</h3>
+                    <p className="text-muted-foreground max-w-xs mx-auto">
+                      Adjust the sliders to match your financial situation and click "Analyze Risk Profile" 
+                      to see your personalized recommendations.
                     </p>
                   </div>
                 )}

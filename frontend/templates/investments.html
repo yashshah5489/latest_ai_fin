@@ -3,291 +3,344 @@
 {% block title %}Investments - Smart AI Financial Analyzer{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4" id="investments-overview">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="mb-4">Investment Portfolio</h1>
-            <p class="text-muted">Track and analyze your investment performance with Indian market insights.</p>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Investment Portfolio</h1>
+    <div>
+        <button class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#importInvestmentsModal">
+            <i class="bi bi-file-earmark-arrow-up me-1"></i> Import Data
+        </button>
+        <button class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Add Investment
+        </button>
     </div>
-    
-    <!-- Portfolio Summary -->
-    <div class="row mb-4">
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Portfolio Summary</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 mb-3 mb-md-0">
-                            <div class="text-center p-3">
-                                <h6 class="text-muted mb-2">Portfolio Value</h6>
-                                <h3 class="mb-1">₹{{ portfolio_summary.portfolioValue|format_currency }}</h3>
-                                {% if portfolio_summary.valueChange > 0 %}
-                                    <span class="badge bg-success">+{{ portfolio_summary.valueChange }}%</span>
-                                {% else %}
-                                    <span class="badge bg-danger">{{ portfolio_summary.valueChange }}%</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3 mb-md-0">
-                            <div class="text-center p-3">
-                                <h6 class="text-muted mb-2">Annual Return</h6>
-                                <h3 class="mb-1">{{ portfolio_summary.annualReturn }}%</h3>
-                                {% if portfolio_summary.benchmarkDiff > 0 %}
-                                    <span class="badge bg-success">+{{ portfolio_summary.benchmarkDiff }}% vs Nifty</span>
-                                {% else %}
-                                    <span class="badge bg-danger">{{ portfolio_summary.benchmarkDiff }}% vs Nifty</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3 mb-md-0">
-                            <div class="text-center p-3">
-                                <h6 class="text-muted mb-2">Dividend Income</h6>
-                                <h3 class="mb-1">₹{{ portfolio_summary.dividendIncome|format_currency }}</h3>
-                                <span class="text-muted">YTD</span>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center p-3">
-                                <h6 class="text-muted mb-2">Last Payment</h6>
-                                <h3 class="mb-1">{{ portfolio_summary.lastPaymentDate }}</h3>
-                                <span class="text-muted">Dividend/Interest</span>
-                            </div>
-                        </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Portfolio Summary Card -->
+    <div class="col-lg-4 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0">Portfolio Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h3 class="mb-1">{{ portfolio_summary.portfolio_value | currency }}</h3>
+                    <div class="d-flex align-items-center">
+                        <span class="badge {{ portfolio_summary.value_change >= 0 ? 'bg-success' : 'bg-danger' }} me-2">
+                            <i class="bi {{ portfolio_summary.value_change >= 0 ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
+                            {{ portfolio_summary.value_change | percentage }}
+                        </span>
+                        <span class="text-muted small">Total Portfolio Value</span>
                     </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Annual Return</span>
+                        <span class="{{ portfolio_summary.annual_return >= 0 ? 'text-success' : 'text-danger' }}">
+                            {{ portfolio_summary.annual_return | percentage }}
+                        </span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar {{ portfolio_summary.annual_return >= 0 ? 'bg-success' : 'bg-danger' }}" style="width: {{ portfolio_summary.annual_return | abs * 100 }}%;"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>vs. NIFTY 50</span>
+                        <span class="{{ portfolio_summary.benchmark_diff >= 0 ? 'text-success' : 'text-danger' }}">
+                            {{ portfolio_summary.benchmark_diff | percentage }}
+                        </span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar {{ portfolio_summary.benchmark_diff >= 0 ? 'bg-success' : 'bg-danger' }}" style="width: {{ portfolio_summary.benchmark_diff | abs * 100 }}%;"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">Dividend Income</h6>
+                            <p class="small text-muted mb-0">Last payment: {{ portfolio_summary.last_payment_date }}</p>
+                        </div>
+                        <span class="h5 mb-0">{{ portfolio_summary.dividend_income | currency }}</span>
+                    </div>
+                </div>
+                
+                <div class="mb-0 mt-4">
+                    <a href="/reports" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-bar-chart-line me-1"></i> View Detailed Report
+                    </a>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Charts Section -->
-    <div class="row mb-4">
-        <!-- Investment Growth -->
-        <div class="col-lg-8 mb-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">Portfolio Performance</h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container" style="height: 350px;">
-                        <canvas id="investment-growth-chart"></canvas>
-                    </div>
+    <!-- Portfolio Allocation Chart -->
+    <div class="col-lg-8 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Portfolio Allocation</h5>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-secondary active chart-toggle" data-chart="allocation">By Type</button>
+                    <button class="btn btn-sm btn-outline-secondary chart-toggle" data-chart="risk">By Risk</button>
                 </div>
             </div>
-        </div>
-        
-        <!-- Investment Returns -->
-        <div class="col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">Annual Returns by Type</h5>
+            <div class="card-body">
+                <div id="allocationChartContainer">
+                    <canvas id="allocationChart" height="280"></canvas>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container" style="height: 350px;">
-                        <canvas id="investment-returns-chart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Investments Table -->
-    <div class="row mb-4">
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Investment Holdings</h5>
-                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#importModal">
-                        <i class="fas fa-file-import me-1"></i> Import Data
-                    </button>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Investment</th>
-                                    <th>Type</th>
-                                    <th class="text-end">Value (₹)</th>
-                                    <th class="text-end">Allocation</th>
-                                    <th class="text-end">Return</th>
-                                    <th>Risk Level</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for investment in investments %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="me-2"><i class="{{ investment.icon }}"></i></div>
-                                            {{ investment.name }}
-                                        </div>
-                                    </td>
-                                    <td>{{ investment.type }}</td>
-                                    <td class="text-end">₹{{ investment.value|format_currency }}</td>
-                                    <td class="text-end">{{ investment.allocation }}%</td>
-                                    <td class="text-end {% if investment.return > 0 %}text-success{% else %}text-danger{% endif %}">
-                                        {% if investment.return > 0 %}+{% endif %}{{ investment.return }}%
-                                    </td>
-                                    <td>
-                                        {% if investment.riskLevel == 'Low' %}
-                                        <span class="badge bg-success">Low</span>
-                                        {% elif investment.riskLevel == 'Medium' %}
-                                        <span class="badge bg-warning">Medium</span>
-                                        {% else %}
-                                        <span class="badge bg-danger">High</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Recommendations -->
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Investment Recommendations for Indian Market</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5>Equity Allocation</h5>
-                                    <p>Based on your risk profile, consider adjusting your equity allocation to align with the current Indian market conditions.</p>
-                                    <a href="/risk-analysis" class="btn btn-sm btn-outline-primary">Review Risk Profile</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5>Tax Efficiency</h5>
-                                    <p>Consider tax-efficient investment options like ELSS funds for Section 80C benefits in addition to potential market returns.</p>
-                                    <a href="/ai-advisor" class="btn btn-sm btn-outline-primary">Ask AI Advisor</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5>Document Analysis</h5>
-                                    <p>Upload your investment statements for detailed analysis and personalized recommendations by our AI.</p>
-                                    <a href="/documents" class="btn btn-sm btn-outline-primary">Upload Statements</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div id="riskChartContainer" class="d-none">
+                    <canvas id="riskChart" height="280"></canvas>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Import Modal -->
-<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+<!-- Investments Table -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">My Investments</h5>
+        <div class="input-group" style="max-width: 300px;">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control" id="investmentSearch" placeholder="Search investments...">
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th>Allocation</th>
+                        <th>Return</th>
+                        <th>Risk</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for investment in investments %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="investment-icon me-2 rounded-circle p-2 {{ investment.icon_bg }}">
+                                    <i class="bi {{ investment.icon }} {{ investment.icon_color }}"></i>
+                                </div>
+                                <span>{{ investment.name }}</span>
+                            </div>
+                        </td>
+                        <td>{{ investment.type }}</td>
+                        <td>{{ investment.value | currency }}</td>
+                        <td>{{ investment.allocation | percentage }}</td>
+                        <td class="{{ investment.return >= 0 ? 'text-success' : 'text-danger' }}">
+                            <i class="bi {{ investment.return >= 0 ? 'bi-arrow-up' : 'bi-arrow-down' }} me-1"></i>
+                            {{ investment.return | percentage }}
+                        </td>
+                        <td>
+                            <span class="badge {{ 
+                                investment.risk_level == 'Low' ? 'bg-success' : 
+                                investment.risk_level == 'Medium' ? 'bg-warning' : 'bg-danger' 
+                            }}">
+                                {{ investment.risk_level }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Import Investments Modal -->
+<div class="modal fade" id="importInvestmentsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="importModalLabel">Import Investment Data</h5>
+                <h5 class="modal-title">Import Investment Data</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="import-form" enctype="multipart/form-data">
+                <form id="importForm" method="post" action="/import-investments" enctype="multipart/form-data">
                     <div class="mb-3">
-                        <label for="investment-file" class="form-label">Choose File</label>
-                        <div class="input-group">
-                            <input type="file" class="form-control" id="investment-file" name="file" accept=".xlsx,.xls,.csv">
-                            <label class="input-group-text custom-file-label" for="investment-file">Browse</label>
-                        </div>
-                        <div class="form-text">Upload Excel or CSV file with your investment data.</div>
+                        <label class="form-label">Select File</label>
+                        <input type="file" class="form-control" id="investmentFile" name="file" accept=".xlsx,.xls,.csv" required>
+                        <div class="form-text">Supported formats: Excel (XLSX, XLS), CSV</div>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <span>Upload your investment data spreadsheet. Our system will automatically process and categorize your investments.</span>
                     </div>
                     <div class="mb-3">
-                        <p class="mb-2">File Format Requirements:</p>
-                        <ul class="small">
-                            <li>Column headers: Name, Type, Value, Return</li>
-                            <li>Types: Equity, Mutual Fund, Bond, Gold, FD, etc.</li>
-                            <li>Values: Numeric values without the ₹ symbol</li>
-                            <li>Returns: Percentage values without the % symbol</li>
-                        </ul>
+                        <label class="form-label">Template</label>
+                        <p class="small mb-2">Please use our template for correct data import:</p>
+                        <a href="/downloads/investment-template.xlsx" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-download me-1"></i> Download Template
+                        </a>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="import-submit">Import Data</button>
+                <button type="submit" form="importForm" class="btn btn-primary">
+                    <span class="spinner-border spinner-border-sm d-none" id="importSpinner"></span>
+                    <span id="importButtonText">Import</span>
+                </button>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
-{% block scripts %}
+{% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Handle import form submission
-        const importSubmit = document.getElementById('import-submit');
-        const importForm = document.getElementById('import-form');
+        // Initialize charts
+        const allocationCtx = document.getElementById('allocationChart').getContext('2d');
+        const riskCtx = document.getElementById('riskChart').getContext('2d');
         
-        if(importSubmit && importForm) {
-            importSubmit.addEventListener('click', function() {
-                const fileInput = document.getElementById('investment-file');
-                
-                if(fileInput.files.length === 0) {
-                    alert('Please select a file to upload');
-                    return;
-                }
-                
-                const formData = new FormData();
-                formData.append('file', fileInput.files[0]);
-                
-                // Show loading state
-                importSubmit.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Importing...';
-                importSubmit.disabled = true;
-                
-                // Upload file
-                fetch('/api/v1/investments/import', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
+        // Allocation Chart
+        const allocationChart = new Chart(allocationCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Equity', 'Mutual Funds', 'Fixed Deposits', 'Gold', 'Bonds', 'Others'],
+                datasets: [{
+                    data: [40, 25, 15, 10, 5, 5],
+                    backgroundColor: [
+                        '#6366f1', // Primary
+                        '#8b5cf6', // Secondary
+                        '#10b981', // Success
+                        '#f59e0b', // Warning
+                        '#ef4444', // Danger
+                        '#94a3b8'  // Muted
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            usePointStyle: true,
+                            color: '#d1d5db'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw}%`;
+                            }
+                        }
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    // Show success message and close modal
-                    alert('Data imported successfully!');
-                    
-                    // Reset form
-                    importForm.reset();
-                    
-                    // Hide modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('importModal'));
-                    modal.hide();
-                    
-                    // Refresh page to show new data
-                    location.reload();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred during import. Please try again.');
-                })
-                .finally(() => {
-                    // Restore button state
-                    importSubmit.innerHTML = 'Import Data';
-                    importSubmit.disabled = false;
-                });
+                }
+            }
+        });
+        
+        // Risk Chart
+        const riskChart = new Chart(riskCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+                datasets: [{
+                    data: [30, 45, 25],
+                    backgroundColor: [
+                        '#10b981', // Success (Low Risk)
+                        '#f59e0b', // Warning (Medium Risk)
+                        '#ef4444'  // Danger (High Risk)
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            usePointStyle: true,
+                            color: '#d1d5db'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Toggle between charts
+        const chartToggles = document.querySelectorAll('.chart-toggle');
+        const allocationContainer = document.getElementById('allocationChartContainer');
+        const riskContainer = document.getElementById('riskChartContainer');
+        
+        chartToggles.forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                chartToggles.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                const chartType = this.getAttribute('data-chart');
+                if (chartType === 'allocation') {
+                    allocationContainer.classList.remove('d-none');
+                    riskContainer.classList.add('d-none');
+                } else {
+                    allocationContainer.classList.add('d-none');
+                    riskContainer.classList.remove('d-none');
+                }
+            });
+        });
+        
+        // Search functionality
+        const searchInput = document.getElementById('investmentSearch');
+        const tableRows = document.querySelectorAll('tbody tr');
+        
+        searchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            tableRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+        
+        // Import form handling
+        const importForm = document.getElementById('importForm');
+        const importButton = document.querySelector('button[form="importForm"]');
+        const importSpinner = document.getElementById('importSpinner');
+        const importButtonText = document.getElementById('importButtonText');
+        
+        if (importForm) {
+            importForm.addEventListener('submit', function() {
+                importButton.disabled = true;
+                importSpinner.classList.remove('d-none');
+                importButtonText.textContent = 'Importing...';
             });
         }
     });

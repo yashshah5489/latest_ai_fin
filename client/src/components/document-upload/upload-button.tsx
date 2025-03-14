@@ -1,37 +1,37 @@
 import { useRef, useState } from "react";
-import { Upload } from "lucide-react";
+import { Upload, FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
+import { uploadDocument } from "@/api/documents";
+import { cn } from "@/lib/utils";
 
-export default function UploadButton() {
+interface UploadButtonProps {
+  className?: string;
+  variant?: "default" | "outline" | "secondary" | "ghost";
+  size?: "default" | "sm" | "lg" | "icon";
+}
+
+export default function UploadButton({ 
+  className,
+  variant = "outline",
+  size = "default"
+}: UploadButtonProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const [isUploading, setIsUploading] = useState(false);
+  const [fileName, setFileName] = useState<string | null>(null);
 
   const uploadMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const response = await fetch('/api/documents/upload', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error || 'Failed to upload document');
-      }
-      
-      return response.json();
-    },
+    mutationFn: uploadDocument,
     onSuccess: (data) => {
       toast({
         title: "Document uploaded",
-        description: "Your document has been successfully uploaded and analyzed.",
+        description: "Your document has been analyzed for financial insights.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/ai/insight'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ai/insights'] });
+      setFileName(null);
     },
     onError: (error: Error) => {
       toast({
@@ -39,9 +39,7 @@ export default function UploadButton() {
         description: error.message,
         variant: "destructive",
       });
-    },
-    onSettled: () => {
-      setIsUploading(false);
+      setFileName(null);
     }
   });
 
@@ -74,10 +72,11 @@ export default function UploadButton() {
       return;
     }
     
-    const formData = new FormData();
-    formData.append('document', file);
+    setFileName(file.name);
     
-    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    
     uploadMutation.mutate(formData);
     
     // Reset the input
@@ -85,23 +84,45 @@ export default function UploadButton() {
   };
 
   return (
-    <>
+    <div className={cn("flex flex-col", className)}>
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
-        style={{ display: 'none' }}
+        className="sr-only"
         accept=".pdf,.xlsx,.xls"
       />
-      <Button
-        variant="outline"
-        className="flex items-center bg-dark-800 hover:bg-dark-600 text-white border-dark-600"
-        onClick={handleClick}
-        disabled={isUploading}
-      >
-        <Upload className="h-4 w-4 mr-2" />
-        {isUploading ? "Uploading..." : "Upload Document"}
-      </Button>
-    </>
+      
+      {fileName && uploadMutation.isPending ? (
+        <Button
+          variant={variant}
+          size={size}
+          className="flex items-center space-x-2"
+          disabled
+        >
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="max-w-[150px] truncate">Analyzing {fileName}...</span>
+        </Button>
+      ) : (
+        <Button
+          variant={variant}
+          size={size}
+          className="flex items-center space-x-2"
+          onClick={handleClick}
+          disabled={uploadMutation.isPending}
+        >
+          {uploadMutation.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <FileText className="h-4 w-4" />
+          )}
+          <span>Upload Financial Document</span>
+        </Button>
+      )}
+      
+      <p className="text-xs text-muted-foreground mt-1">
+        Upload statements, reports or investment data (PDF/Excel)
+      </p>
+    </div>
   );
 }

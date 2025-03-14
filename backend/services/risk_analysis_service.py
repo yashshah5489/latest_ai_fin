@@ -1,8 +1,9 @@
+"""
+Risk analysis service for generating investment recommendations
+"""
 import logging
 from typing import Dict, Any, List
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class RiskAnalysisService:
@@ -18,23 +19,29 @@ class RiskAnalysisService:
         Returns:
             Dictionary with risk analysis results
         """
-        # Calculate risk score based on various factors
         try:
-            age_score = self._calculate_age_score(profile_data.get("age", 35))
-            horizon_score = self._calculate_horizon_score(profile_data.get("investmentHorizon", 5))
-            risk_tolerance_score = float(profile_data.get("riskTolerance", 5)) / 10  # Convert to 0-1 scale
-            emergency_score = self._calculate_emergency_score(profile_data.get("emergencyFund", 3))
-            income_stability_score = float(profile_data.get("incomeStability", 5)) / 10  # Convert to 0-1 scale
+            # Extract profile data
+            age = profile_data.get("age", 30)
+            investment_horizon = profile_data.get("investment_horizon", 10)
+            risk_tolerance = profile_data.get("risk_tolerance", 5)
+            emergency_fund = profile_data.get("emergency_fund", 6)
+            income_stability = profile_data.get("income_stability", 5)
             
-            # Calculate overall risk score (0-100 scale)
-            # Weighted average of the factors
+            # Calculate risk scores
+            age_score = self._calculate_age_score(age)
+            horizon_score = self._calculate_horizon_score(investment_horizon)
+            tolerance_score = risk_tolerance * 2  # Scale 1-10 to 2-20
+            emergency_score = self._calculate_emergency_score(emergency_fund)
+            stability_score = income_stability * 2  # Scale 1-10 to 2-20
+            
+            # Calculate total risk score (out of 100)
             risk_score = (
-                age_score * 0.20 + 
-                horizon_score * 0.25 + 
-                risk_tolerance_score * 0.30 + 
-                emergency_score * 0.15 + 
-                income_stability_score * 0.10
-            ) * 100
+                age_score * 0.15 +          # 15% weight
+                horizon_score * 0.20 +      # 20% weight
+                tolerance_score * 0.35 +    # 35% weight
+                emergency_score * 0.15 +    # 15% weight
+                stability_score * 0.15      # 15% weight
+            )
             
             # Determine risk category
             risk_category = self._get_risk_category(risk_score)
@@ -42,64 +49,108 @@ class RiskAnalysisService:
             # Generate asset allocation
             asset_allocation = self._generate_asset_allocation(risk_score)
             
-            # Generate personalized recommendations
-            recommendations = self._generate_recommendations(profile_data, risk_score, risk_category)
+            # Generate recommendations
+            recommendations = self._generate_recommendations(
+                profile_data, risk_score, risk_category
+            )
             
+            # Return results
             return {
-                "riskScore": round(risk_score, 1),
-                "riskCategory": risk_category,
-                "assetAllocation": asset_allocation,
+                "risk_score": round(risk_score, 1),
+                "risk_category": risk_category,
+                "asset_allocation": asset_allocation,
                 "recommendations": recommendations
             }
             
         except Exception as e:
             logger.error(f"Error analyzing risk profile: {str(e)}")
-            raise
+            # Return default values
+            return {
+                "risk_score": 50.0,
+                "risk_category": "Moderate",
+                "asset_allocation": {
+                    "equities": 50,
+                    "fixed_income": 30,
+                    "gold": 10,
+                    "cash": 10
+                },
+                "recommendations": [
+                    "We encountered an error analyzing your risk profile. Please try again."
+                ]
+            }
     
     def _calculate_age_score(self, age: int) -> float:
-        """Calculate age component of risk score"""
+        """
+        Calculate risk score component based on age
+        
+        Args:
+            age: User's age
+            
+        Returns:
+            Age risk score component (0-20)
+        """
         # Younger investors can take more risk
         if age < 30:
-            return 0.9  # Higher risk capacity
+            return 18.0
         elif age < 40:
-            return 0.75
+            return 16.0
         elif age < 50:
-            return 0.6
+            return 12.0
         elif age < 60:
-            return 0.4
+            return 8.0
         else:
-            return 0.25  # Lower risk capacity
+            return 5.0
     
     def _calculate_horizon_score(self, years: int) -> float:
-        """Calculate investment horizon component of risk score"""
-        # Longer time horizons allow for more risk
-        if years < 2:
-            return 0.2  # Short term needs safety
+        """
+        Calculate risk score component based on investment horizon
+        
+        Args:
+            years: Investment horizon in years
+            
+        Returns:
+            Horizon risk score component (0-20)
+        """
+        # Longer horizons can handle more risk
+        if years < 3:
+            return 5.0
         elif years < 5:
-            return 0.4
+            return 10.0
         elif years < 10:
-            return 0.6
-        elif years < 20:
-            return 0.8
+            return 15.0
         else:
-            return 0.95  # Long horizon allows high risk
+            return 20.0
     
     def _calculate_emergency_score(self, months: int) -> float:
-        """Calculate emergency fund component of risk score"""
-        # More emergency savings allow for more investment risk
-        if months < 1:
-            return 0.1  # Very risky with no emergency fund
-        elif months < 3:
-            return 0.3
+        """
+        Calculate risk score component based on emergency fund
+        
+        Args:
+            months: Emergency fund in months of expenses
+            
+        Returns:
+            Emergency fund risk score component (0-20)
+        """
+        # More emergency savings can handle more investment risk
+        if months < 3:
+            return 5.0
         elif months < 6:
-            return 0.6
-        elif months < 12:
-            return 0.8
+            return 10.0
+        elif months < 9:
+            return 15.0
         else:
-            return 0.9  # Good emergency fund
+            return 20.0
     
     def _get_risk_category(self, score: float) -> str:
-        """Determine risk category based on score"""
+        """
+        Get risk category based on score
+        
+        Args:
+            score: Risk score (0-100)
+            
+        Returns:
+            Risk category
+        """
         if score < 30:
             return "Conservative"
         elif score < 50:
@@ -112,123 +163,128 @@ class RiskAnalysisService:
             return "Aggressive"
     
     def _generate_asset_allocation(self, risk_score: float) -> Dict[str, int]:
-        """Generate asset allocation based on risk score"""
-        # Indian market context for asset allocation
+        """
+        Generate asset allocation based on risk score
+        
+        Args:
+            risk_score: Risk score (0-100)
+            
+        Returns:
+            Dictionary with asset allocation percentages
+        """
+        # Conservative allocation (score < 30)
         if risk_score < 30:
-            # Conservative - heavy on fixed income, gold
             return {
-                "equities": 25,
-                "fixedIncome": 50,
-                "gold": 15,
+                "equities": 20,
+                "fixed_income": 50,
+                "gold": 20,
                 "cash": 10
             }
+        # Moderately Conservative (score < 50)
         elif risk_score < 50:
-            # Moderately Conservative
             return {
-                "equities": 40,
-                "fixedIncome": 40,
+                "equities": 35,
+                "fixed_income": 45,
                 "gold": 15,
                 "cash": 5
             }
+        # Moderate (score < 70)
         elif risk_score < 70:
-            # Moderate
             return {
-                "equities": 55,
-                "fixedIncome": 30,
-                "gold": 10,
+                "equities": 50,
+                "fixed_income": 30,
+                "gold": 15,
                 "cash": 5
             }
+        # Moderately Aggressive (score < 85)
         elif risk_score < 85:
-            # Moderately Aggressive
             return {
                 "equities": 70,
-                "fixedIncome": 20,
+                "fixed_income": 20,
                 "gold": 5,
                 "cash": 5
             }
+        # Aggressive (score >= 85)
         else:
-            # Aggressive
             return {
                 "equities": 80,
-                "fixedIncome": 15,
-                "gold": 3,
-                "cash": 2
+                "fixed_income": 10,
+                "gold": 5,
+                "cash": 5
             }
     
     def _generate_recommendations(
-        self, 
-        data: Dict[str, Any], 
-        risk_score: float, 
-        risk_category: str
+        self, data: Dict[str, Any], risk_score: float, risk_category: str
     ) -> List[str]:
-        """Generate personalized recommendations based on risk profile"""
-        age = data.get("age", 35)
-        investment_horizon = data.get("investmentHorizon", 5)
-        emergency_fund = data.get("emergencyFund", 3)
+        """
+        Generate personalized recommendations
         
+        Args:
+            data: User profile data
+            risk_score: Calculated risk score
+            risk_category: Risk category
+            
+        Returns:
+            List of personalized recommendations
+        """
         recommendations = []
         
-        # Basic recommendation based on risk category
-        if risk_category == "Conservative":
-            recommendations.append(
-                "Focus on capital preservation with safer options like bank fixed deposits, government bonds, and PSU bonds."
-            )
-        elif risk_category == "Moderately Conservative":
-            recommendations.append(
-                "Consider a mix of debt mutual funds, corporate bonds, and a small allocation to large-cap equity funds."
-            )
-        elif risk_category == "Moderate":
-            recommendations.append(
-                "Balance your portfolio with quality large and mid-cap funds, along with debt instruments like corporate bonds."
-            )
-        elif risk_category == "Moderately Aggressive":
-            recommendations.append(
-                "Increase exposure to equity through diversified multi-cap funds and a small allocation to sectoral/thematic funds."
-            )
-        else:  # Aggressive
-            recommendations.append(
-                "Focus on growth through a diversified equity portfolio with mid and small-cap exposure, along with some international equity funds."
-            )
-        
-        # Emergency fund recommendation
-        if emergency_fund < 6:
-            recommendations.append(
-                f"Build your emergency fund to cover at least 6 months of expenses, currently at {emergency_fund} months."
-            )
-        
-        # Tax-saving recommendation
-        if age < 60:
-            recommendations.append(
-                "Consider tax-saving options like ELSS funds or PPF to maximize tax benefits under Section 80C."
-            )
-        
-        # Retirement specific recommendation
-        if age > 40:
-            recommendations.append(
-                "Allocate to the National Pension System (NPS) for additional tax benefits and retirement planning."
-            )
-        
-        # Investment horizon recommendation
-        if investment_horizon > 10:
-            recommendations.append(
-                "With your long investment horizon, consider Systematic Investment Plans (SIPs) in equity mutual funds to benefit from rupee cost averaging."
-            )
-        
-        # Age-specific recommendations
+        # Age-based recommendations
+        age = data.get("age", 30)
         if age < 30:
             recommendations.append(
-                "At your age, consider starting a SIP in a mix of equity funds to build wealth over the long term."
+                "At your age, you can afford to take more risk for potentially higher returns. "
+                "Consider allocating more to equity mutual funds or direct equity investments."
             )
-        elif 30 <= age < 45:
+        elif age > 50:
             recommendations.append(
-                "Balance growth and stability with a mix of equity and debt instruments appropriate for your mid-career stage."
-            )
-        else:
-            recommendations.append(
-                "Consider gradually increasing allocation to safer assets as you approach retirement age."
+                "As you approach retirement, consider gradually shifting towards more conservative "
+                "investments like government bonds and fixed deposits."
             )
         
-        return recommendations[:5]  # Return top 5 recommendations
+        # Emergency fund recommendations
+        emergency_fund = data.get("emergency_fund", 6)
+        if emergency_fund < 6:
+            recommendations.append(
+                f"Your emergency fund covers {emergency_fund} months of expenses. Consider building this "
+                "to at least 6 months before taking on high-risk investments."
+            )
+        
+        # Investment horizon recommendations
+        horizon = data.get("investment_horizon", 10)
+        if horizon < 5 and risk_score > 50:
+            recommendations.append(
+                f"Your investment horizon is {horizon} years, which may be too short for your risk profile. "
+                "Consider reducing exposure to volatile assets or extending your time horizon."
+            )
+        
+        # Income stability recommendations
+        stability = data.get("income_stability", 5)
+        if stability < 5:
+            recommendations.append(
+                "With your income stability level, consider allocating more to liquid investments "
+                "and reducing exposure to illiquid assets like real estate."
+            )
+        
+        # Risk-category specific recommendations
+        if risk_category == "Conservative":
+            recommendations.append(
+                "Your risk profile suggests a focus on capital preservation. Consider investments "
+                "like fixed deposits, government bonds, and post office schemes like PPF."
+            )
+        elif risk_category == "Aggressive":
+            recommendations.append(
+                "Your risk profile allows for significant equity exposure. Consider a mix of "
+                "large-cap, mid-cap, and small-cap mutual funds or direct equity investments."
+            )
+        
+        # Tax-saving recommendations
+        recommendations.append(
+            "For tax efficiency, consider ELSS mutual funds that offer tax benefits under Section 80C "
+            "with the potential for higher returns than traditional tax-saving instruments."
+        )
+        
+        return recommendations
 
-# Create a singleton instance
+# Singleton instance
 risk_analysis_service = RiskAnalysisService()

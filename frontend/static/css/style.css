@@ -1,355 +1,262 @@
-:root {
-    /* Dark theme colors - India-focused with dark blue theme */
-    --primary-color: #2D81FF;       /* Primary blue */
-    --secondary-color: #6D35E3;     /* Secondary purple */
-    --accent-color: #FF9A3C;        /* Accent orange (inspired by Indian flag) */
-    --dark-bg: #121212;             /* Dark background */
-    --dark-card-bg: #1E1E1E;        /* Slightly lighter for cards */
-    --dark-input-bg: #2D2D2D;       /* Input background */
-    --light-text: #F5F5F5;          /* Light text */
-    --muted-text: #AAAAAA;          /* Muted text */
-    --border-color: #2D2D2D;        /* Border color */
-    --success-color: #4CAF50;       /* Success green */
-    --danger-color: #F44336;        /* Danger red */
-    --warning-color: #FFC107;       /* Warning yellow */
-    --info-color: #2196F3;          /* Info blue */
+/**
+ * Smart AI Financial Analyzer - Custom CSS
+ */
+
+/* Hover effect for cards */
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Base Styles */
-body.dark-theme {
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--dark-bg);
-    color: var(--light-text);
-}
-
-/* Typography */
-.dark-theme h1, .dark-theme h2, .dark-theme h3, .dark-theme h4, .dark-theme h5, .dark-theme h6 {
-    color: var(--light-text);
-    font-weight: 600;
-}
-
-.dark-theme .text-muted {
-    color: var(--muted-text) !important;
-}
-
-/* Navbar styles */
-.dark-theme .navbar {
-    background-color: var(--dark-card-bg);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.dark-theme .navbar-brand {
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-.dark-theme .nav-link {
-    color: var(--light-text);
-    transition: color 0.3s ease;
-}
-
-.dark-theme .nav-link:hover, .dark-theme .nav-link.active {
-    color: var(--primary-color);
-}
-
-.dark-theme .navbar-toggler {
-    border-color: var(--border-color);
-}
-
-/* Card styles */
-.dark-theme .card {
-    background-color: var(--dark-card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.dark-theme .card:hover {
+.hover-lift:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.dark-theme .card-header {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-bottom: 1px solid var(--border-color);
+/* Dashboard styles */
+.stat-card {
+    transition: all 0.2s ease;
 }
 
-.dark-theme .card-footer {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-top: 1px solid var(--border-color);
+.stat-card:hover {
+    transform: translateY(-5px);
 }
 
-/* Form controls */
-.dark-theme .form-control,
-.dark-theme .form-select {
-    background-color: var(--dark-input-bg);
-    border: 1px solid var(--border-color);
-    color: var(--light-text);
+/* Chat interface styles */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 70vh;
+    max-height: 70vh;
 }
 
-.dark-theme .form-control:focus,
-.dark-theme .form-select:focus {
-    background-color: var(--dark-input-bg);
-    color: var(--light-text);
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.25rem rgba(45, 129, 255, 0.25);
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-.dark-theme .form-label {
-    color: var(--light-text);
+.chat-message {
+    display: flex;
+    margin-bottom: 1rem;
+    max-width: 85%;
 }
 
-/* Button styles */
-.dark-theme .btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+.chat-message.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
 }
 
-.dark-theme .btn-secondary {
-    background-color: var(--secondary-color);
-    border-color: var(--secondary-color);
-}
-
-.dark-theme .btn-accent {
-    background-color: var(--accent-color);
-    border-color: var(--accent-color);
-    color: var(--dark-bg);
-}
-
-.dark-theme .btn-outline-primary {
-    color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.dark-theme .btn-outline-primary:hover {
-    background-color: var(--primary-color);
-    color: var(--light-text);
-}
-
-/* Table styles */
-.dark-theme .table {
-    color: var(--light-text);
-}
-
-.dark-theme .table-striped > tbody > tr:nth-of-type(odd) > * {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: var(--light-text);
-}
-
-.dark-theme .table-hover > tbody > tr:hover > * {
-    background-color: rgba(45, 129, 255, 0.1);
-}
-
-.dark-theme .table thead th {
-    background-color: var(--dark-card-bg);
-    border-bottom: 2px solid var(--border-color);
-}
-
-/* Dropdown styles */
-.dark-theme .dropdown-menu {
-    background-color: var(--dark-card-bg);
-    border: 1px solid var(--border-color);
-}
-
-.dark-theme .dropdown-item {
-    color: var(--light-text);
-}
-
-.dark-theme .dropdown-item:hover, .dark-theme .dropdown-item:focus {
-    background-color: rgba(45, 129, 255, 0.1);
-    color: var(--primary-color);
-}
-
-.dark-theme .dropdown-divider {
-    border-top: 1px solid var(--border-color);
-}
-
-/* Alert styles */
-.dark-theme .alert-primary {
-    background-color: rgba(45, 129, 255, 0.2);
-    border-color: rgba(45, 129, 255, 0.3);
-    color: var(--primary-color);
-}
-
-.dark-theme .alert-danger {
-    background-color: rgba(244, 67, 54, 0.2);
-    border-color: rgba(244, 67, 54, 0.3);
-    color: var(--danger-color);
-}
-
-.dark-theme .alert-success {
-    background-color: rgba(76, 175, 80, 0.2);
-    border-color: rgba(76, 175, 80, 0.3);
-    color: var(--success-color);
-}
-
-.dark-theme .alert-warning {
-    background-color: rgba(255, 193, 7, 0.2);
-    border-color: rgba(255, 193, 7, 0.3);
-    color: var(--warning-color);
-}
-
-/* Badge styles */
-.dark-theme .badge.bg-primary {
-    background-color: var(--primary-color) !important;
-}
-
-.dark-theme .badge.bg-secondary {
-    background-color: var(--secondary-color) !important;
-}
-
-.dark-theme .badge.bg-success {
-    background-color: var(--success-color) !important;
-}
-
-.dark-theme .badge.bg-danger {
-    background-color: var(--danger-color) !important;
-}
-
-.dark-theme .badge.bg-warning {
-    background-color: var(--warning-color) !important;
-    color: var(--dark-bg);
-}
-
-.dark-theme .badge.bg-info {
-    background-color: var(--info-color) !important;
-}
-
-/* Progress bar */
-.dark-theme .progress {
-    background-color: var(--dark-input-bg);
-}
-
-.dark-theme .progress-bar {
-    background-color: var(--primary-color);
-}
-
-/* Footer styles */
-.dark-theme .footer {
-    background-color: var(--dark-card-bg);
-    color: var(--muted-text);
-    padding: 20px 0;
-    margin-top: 2rem;
-}
-
-/* Charts */
-.dark-theme .chart-container {
-    background-color: var(--dark-card-bg);
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-}
-
-/* Dashboard widgets */
-.dark-theme .stat-card {
-    border-left: 4px solid var(--primary-color);
-}
-
-.dark-theme .stat-card.positive {
-    border-left-color: var(--success-color);
-}
-
-.dark-theme .stat-card.negative {
-    border-left-color: var(--danger-color);
-}
-
-.dark-theme .stat-card .stat-icon {
-    width: 48px;
-    height: 48px;
+.message-avatar {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(45, 129, 255, 0.1);
-    color: var(--primary-color);
+    margin: 0 0.75rem;
 }
 
-.dark-theme .stat-card.positive .stat-icon {
-    background-color: rgba(76, 175, 80, 0.1);
-    color: var(--success-color);
+.chat-message.user .message-avatar {
+    background-color: var(--secondary-color);
 }
 
-.dark-theme .stat-card.negative .stat-icon {
-    background-color: rgba(244, 67, 54, 0.1);
-    color: var(--danger-color);
+.message-content {
+    background-color: rgba(99, 102, 241, 0.1);
+    padding: 1rem;
+    border-radius: 1rem;
+    border-top-left-radius: 0;
 }
 
-/* AI Chat styles */
-.dark-theme .chat-container {
-    max-height: 500px;
-    overflow-y: auto;
+.chat-message.user .message-content {
+    background-color: rgba(139, 92, 246, 0.1);
+    border-radius: 1rem;
+    border-top-right-radius: 0;
 }
 
-.dark-theme .message {
-    margin-bottom: 15px;
-    padding: 10px 15px;
-    border-radius: 15px;
-    max-width: 80%;
+.message-text {
+    margin-bottom: 0.5rem;
 }
 
-.dark-theme .message.user {
-    background-color: var(--primary-color);
-    color: white;
-    margin-left: auto;
-    border-bottom-right-radius: 0;
+.message-text p {
+    margin-bottom: 0.5rem;
 }
 
-.dark-theme .message.assistant {
-    background-color: var(--dark-input-bg);
-    border-bottom-left-radius: 0;
+.message-text p:last-child {
+    margin-bottom: 0;
 }
 
-/* Risk analysis specific styles */
-.dark-theme .risk-meter {
-    height: 20px;
-    background: linear-gradient(to right, var(--success-color), var(--warning-color), var(--danger-color));
-    border-radius: 10px;
-    position: relative;
-    margin: 20px 0;
+.message-text ul {
+    margin-bottom: 0;
+    padding-left: 1.25rem;
 }
 
-.dark-theme .risk-meter-marker {
+.message-time {
+    font-size: 0.75rem;
+    color: var(--medium-text);
+    text-align: right;
+}
+
+.chat-input {
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+.typing-indicator .dot {
+    width: 8px;
+    height: 8px;
+    margin: 0 1px;
+    background-color: var(--medium-text);
+    border-radius: 50%;
+    animation: typing 1.5s infinite;
+}
+
+.typing-indicator .dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator .dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Risk analysis */
+.risk-meter {
+    padding-top: 15px;
+}
+
+.risk-indicator {
     position: absolute;
-    width: 15px;
-    height: 25px;
-    background-color: white;
-    border: 2px solid var(--dark-bg);
-    border-radius: 3px;
-    top: -2px;
+    top: -10px;
     transform: translateX(-50%);
 }
 
-/* Investment breakdown */
-.dark-theme .investment-pie-container {
-    max-width: 300px;
+.risk-indicator-point {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 3px solid #6366f1;
     margin: 0 auto;
 }
 
-/* Document styles */
-.dark-theme .document-card {
-    transition: all 0.3s ease;
+.risk-indicator-label {
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 4px;
 }
 
-.dark-theme .document-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+/* Document list */
+.document-icon {
+    font-size: 1.25rem;
 }
 
-.dark-theme .document-icon {
-    font-size: 2rem;
-    margin-bottom: 10px;
-}
-
-/* Mobile responsiveness */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    .dark-theme .navbar-collapse {
-        background-color: var(--dark-card-bg);
-        padding: 10px;
-        border-radius: 5px;
+    .chat-message {
+        max-width: 95%;
     }
     
-    .dark-theme .message {
-        max-width: 90%;
+    .message-avatar {
+        width: 32px;
+        height: 32px;
+        margin: 0 0.5rem;
     }
+    
+    .message-content {
+        padding: 0.75rem;
+    }
+}
+
+/* Fix for dark mode tables */
+.table {
+    color: var(--light-text);
+    border-color: var(--border-color);
+}
+
+.table th,
+.table td {
+    border-color: var(--border-color);
+}
+
+/* Specific Indian finance styles */
+.indian-currency:before {
+    content: "₹";
+    margin-right: 2px;
+}
+
+/* Investment icons */
+.investment-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-bg-equity {
+    background-color: rgba(99, 102, 241, 0.2);
+}
+
+.icon-bg-mutual-fund {
+    background-color: rgba(139, 92, 246, 0.2);
+}
+
+.icon-bg-fixed-deposit {
+    background-color: rgba(16, 185, 129, 0.2);
+}
+
+.icon-bg-gold {
+    background-color: rgba(245, 158, 11, 0.2);
+}
+
+.icon-bg-bond {
+    background-color: rgba(236, 72, 153, 0.2);
+}
+
+.icon-bg-other {
+    background-color: rgba(148, 163, 184, 0.2);
+}
+
+.icon-color-equity {
+    color: #6366f1;
+}
+
+.icon-color-mutual-fund {
+    color: #8b5cf6;
+}
+
+.icon-color-fixed-deposit {
+    color: #10b981;
+}
+
+.icon-color-gold {
+    color: #f59e0b;
+}
+
+.icon-color-bond {
+    color: #ec4899;
+}
+
+.icon-color-other {
+    color: #94a3b8;
 }

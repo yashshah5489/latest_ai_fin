@@ -3,181 +3,471 @@
 {% block title %}Risk Analysis - Smart AI Financial Analyzer{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="mb-4">Risk Profile Analysis</h1>
-            <p class="text-muted">Assess your risk tolerance and get personalized investment recommendations based on your financial profile.</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Risk Analysis</h1>
+</div>
+
+<div class="row">
+    <!-- Risk Assessment Form -->
+    <div class="col-lg-5 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0">Risk Profile Assessment</h5>
+            </div>
+            <div class="card-body">
+                {% if not risk_analysis %}
+                <form id="riskForm" method="post" action="/analyze-risk">
+                    <div class="mb-3">
+                        <label for="age" class="form-label">Age</label>
+                        <input type="number" class="form-control" id="age" name="age" min="18" max="100" required>
+                        <div class="form-text">Your age affects your investment time horizon.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="investment_horizon" class="form-label">Investment Horizon (years)</label>
+                        <select class="form-select" id="investment_horizon" name="investment_horizon" required>
+                            <option value="" selected disabled>Select time horizon</option>
+                            <option value="1">Less than 1 year</option>
+                            <option value="3">1-3 years</option>
+                            <option value="5">3-5 years</option>
+                            <option value="10">5-10 years</option>
+                            <option value="20">More than 10 years</option>
+                        </select>
+                        <div class="form-text">How long do you plan to keep your money invested?</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Risk Tolerance</label>
+                        <div class="py-2">
+                            <input type="range" class="form-range" id="risk_tolerance" name="risk_tolerance" min="1" max="10" value="5">
+                            <div class="d-flex justify-content-between">
+                                <span class="small text-muted">Conservative</span>
+                                <span id="riskToleranceValue" class="fw-bold">Moderate (5)</span>
+                                <span class="small text-muted">Aggressive</span>
+                            </div>
+                        </div>
+                        <div class="form-text">How comfortable are you with investment volatility?</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="emergency_fund" class="form-label">Emergency Fund (months)</label>
+                        <select class="form-select" id="emergency_fund" name="emergency_fund" required>
+                            <option value="" selected disabled>Select option</option>
+                            <option value="0">No emergency fund</option>
+                            <option value="1">1 month of expenses</option>
+                            <option value="3">3 months of expenses</option>
+                            <option value="6">6 months of expenses</option>
+                            <option value="12">12+ months of expenses</option>
+                        </select>
+                        <div class="form-text">How many months of expenses do you have saved in an easily accessible emergency fund?</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Income Stability</label>
+                        <div class="py-2">
+                            <input type="range" class="form-range" id="income_stability" name="income_stability" min="1" max="10" value="5">
+                            <div class="d-flex justify-content-between">
+                                <span class="small text-muted">Unstable</span>
+                                <span id="incomeStabilityValue" class="fw-bold">Moderate (5)</span>
+                                <span class="small text-muted">Very Stable</span>
+                            </div>
+                        </div>
+                        <div class="form-text">How stable is your income source?</div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Analyze Risk Profile</button>
+                    </div>
+                </form>
+                {% else %}
+                <div class="alert alert-success mb-4">
+                    <h6 class="mb-2"><i class="bi bi-check-circle me-2"></i>Your Risk Profile Has Been Analyzed</h6>
+                    <p class="mb-0 small">You can update your risk profile by filling out the form again.</p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Age</label>
+                    <input type="text" class="form-control" value="{{ risk_analysis.age }}" readonly>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Investment Horizon</label>
+                    <input type="text" class="form-control" value="{{ risk_analysis.investment_horizon }} years" readonly>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Risk Tolerance</label>
+                    <div class="progress" style="height: 2rem;">
+                        <div class="progress-bar progress-bar-striped {{ 
+                            risk_analysis.risk_tolerance <= 3 ? 'bg-success' : 
+                            risk_analysis.risk_tolerance <= 7 ? 'bg-warning' : 'bg-danger' 
+                        }}" 
+                        style="width: {{ (risk_analysis.risk_tolerance / 10) * 100 }}%">
+                            {{ risk_analysis.risk_tolerance }}/10
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Emergency Fund</label>
+                    <input type="text" class="form-control" value="{{ risk_analysis.emergency_fund }} months" readonly>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Income Stability</label>
+                    <div class="progress" style="height: 2rem;">
+                        <div class="progress-bar progress-bar-striped {{ 
+                            risk_analysis.income_stability <= 3 ? 'bg-danger' : 
+                            risk_analysis.income_stability <= 7 ? 'bg-warning' : 'bg-success' 
+                        }}" 
+                        style="width: {{ (risk_analysis.income_stability / 10) * 100 }}%">
+                            {{ risk_analysis.income_stability }}/10
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid mt-4">
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#updateRiskProfileModal">
+                        Update Risk Profile
+                    </button>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
     
-    <!-- Risk Analysis Form -->
-    <div class="row" id="risk-analysis-form-container">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Risk Tolerance Assessment</h5>
-                </div>
-                <div class="card-body">
-                    <form id="risk-analysis-form">
-                        <div class="mb-4">
-                            <label for="age" class="form-label">Your Age</label>
-                            <input type="number" class="form-control" id="age" name="age" min="18" max="100" value="35" required>
-                            <div class="form-text">Generally, younger investors can afford to take more risk.</div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label for="investment-horizon" class="form-label">Investment Horizon (years)</label>
-                            <input type="number" class="form-control" id="investment-horizon" name="investmentHorizon" min="1" max="40" value="10" required>
-                            <div class="form-text">Longer investment horizons usually allow for taking more risk.</div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label for="risk-tolerance" class="form-label">Risk Tolerance (1-10)</label>
-                            <input type="range" class="form-range" id="risk-tolerance" name="riskTolerance" min="1" max="10" value="5" required>
-                            <div class="d-flex justify-content-between">
-                                <small class="text-muted">Conservative (1)</small>
-                                <small class="text-muted">Moderate (5)</small>
-                                <small class="text-muted">Aggressive (10)</small>
-                            </div>
-                            <div class="form-text">How comfortable are you with the possibility of losing money for potentially higher returns?</div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label for="emergency-fund" class="form-label">Emergency Fund (months of expenses)</label>
-                            <input type="number" class="form-control" id="emergency-fund" name="emergencyFund" min="0" max="36" value="3" required>
-                            <div class="form-text">A larger emergency fund can allow for more aggressive investing.</div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label for="income-stability" class="form-label">Income Stability (1-10)</label>
-                            <input type="range" class="form-range" id="income-stability" name="incomeStability" min="1" max="10" value="7" required>
-                            <div class="d-flex justify-content-between">
-                                <small class="text-muted">Unstable (1)</small>
-                                <small class="text-muted">Average (5)</small>
-                                <small class="text-muted">Very Stable (10)</small>
-                            </div>
-                            <div class="form-text">How stable is your income source? Government jobs would be 10, freelancing might be 3-5.</div>
-                        </div>
-                        
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Analyze My Risk Profile</button>
-                        </div>
-                    </form>
-                </div>
+    <!-- Risk Analysis Results -->
+    <div class="col-lg-7 mb-4">
+        {% if risk_analysis and risk_analysis.result %}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0">Your Risk Profile: {{ risk_analysis.result.risk_category }}</h5>
             </div>
-        </div>
-        
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Current Risk Level</h5>
-                </div>
-                <div class="card-body">
-                    <p>Based on your current inputs:</p>
-                    
-                    <div class="risk-meter">
-                        <div id="risk-meter-marker" class="risk-meter-marker" style="left: 50%"></div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Risk Score</span>
+                        <span class="fw-bold">{{ risk_analysis.result.risk_score | round(1) }}/10</span>
                     </div>
-                    
-                    <div class="text-center mb-4">
-                        <h4 id="risk-category">Moderate</h4>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <h6>What this means:</h6>
-                        <p class="mb-1">Your current risk level will help determine:</p>
-                        <ul>
-                            <li>Your optimal asset allocation</li>
-                            <li>The types of investments suitable for you</li>
-                            <li>How to balance growth vs. stability</li>
-                            <li>Recommended investment strategies</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Risk Analysis Results (hidden initially) -->
-    <div class="row d-none" id="risk-analysis-results">
-        <div class="col-lg-8">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Your Risk Analysis Results</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6 text-center">
-                            <h6 class="text-muted">Risk Score</h6>
-                            <h1 id="result-risk-score" class="display-4">65</h1>
+                    <div class="risk-meter position-relative mb-3">
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 33%"></div>
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: 34%"></div>
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: 33%"></div>
                         </div>
-                        <div class="col-md-6 text-center">
-                            <h6 class="text-muted">Risk Category</h6>
-                            <h2 id="result-risk-category">Moderate</h2>
+                        <div class="risk-indicator" style="left: {{ (risk_analysis.result.risk_score / 10) * 100 }}%">
+                            <div class="risk-indicator-point"></div>
+                            <div class="risk-indicator-label">You</div>
+                        </div>
+                        <div class="risk-labels d-flex justify-content-between mt-1">
+                            <span class="small text-muted">Conservative</span>
+                            <span class="small text-muted">Moderate</span>
+                            <span class="small text-muted">Aggressive</span>
                         </div>
                     </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <h5 class="mb-3">Recommended Asset Allocation</h5>
-                            <div style="height: 250px;">
-                                <canvas id="asset-allocation-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    
+                    <p class="mb-0">Based on your inputs, you have a <strong>{{ risk_analysis.result.risk_category }}</strong> risk profile. This suggests {{ risk_analysis.result.risk_score < 5 ? 'a more conservative' : risk_analysis.result.risk_score < 7 ? 'a balanced' : 'an aggressive' }} approach to investing.</p>
+                </div>
+                
+                <hr>
+                
+                <div class="mb-4">
+                    <h6 class="mb-3">Recommended Asset Allocation</h6>
                     <div class="row">
-                        <div class="col-md-12">
-                            <h5 class="mb-3">Personalized Recommendations</h5>
-                            <ul id="recommendations-list" class="list-group">
-                                <!-- Recommendations will be added here -->
-                            </ul>
+                        <div class="col-md-6">
+                            <canvas id="assetAllocationChart" height="200"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="allocation-list">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div>
+                                        <i class="bi bi-circle-fill text-primary me-2"></i>
+                                        <span>Equities</span>
+                                    </div>
+                                    <span class="fw-bold">{{ risk_analysis.result.asset_allocation.equities }}%</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div>
+                                        <i class="bi bi-circle-fill text-secondary me-2"></i>
+                                        <span>Fixed Income</span>
+                                    </div>
+                                    <span class="fw-bold">{{ risk_analysis.result.asset_allocation.fixed_income }}%</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div>
+                                        <i class="bi bi-circle-fill text-warning me-2"></i>
+                                        <span>Gold</span>
+                                    </div>
+                                    <span class="fw-bold">{{ risk_analysis.result.asset_allocation.gold }}%</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <i class="bi bi-circle-fill text-info me-2"></i>
+                                        <span>Cash</span>
+                                    </div>
+                                    <span class="fw-bold">{{ risk_analysis.result.asset_allocation.cash }}%</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="card-footer text-center">
-                    <button id="try-again-button" class="btn btn-outline-primary">Adjust Your Profile</button>
+                
+                <hr>
+                
+                <div>
+                    <h6 class="mb-3">Personalized Recommendations</h6>
+                    <ul class="list-group list-group-flush">
+                        {% for recommendation in risk_analysis.result.recommendations %}
+                        <li class="list-group-item bg-transparent ps-0">
+                            <div class="d-flex">
+                                <div class="me-3 text-primary"><i class="bi bi-lightbulb-fill"></i></div>
+                                <div>{{ recommendation }}</div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
-        
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">What This Means</h5>
+        {% else %}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body text-center py-5">
+                <div class="mb-3">
+                    <i class="bi bi-shield-check display-1 text-muted"></i>
                 </div>
-                <div class="card-body">
-                    <div class="mb-4">
-                        <h6>Conservative (0-30)</h6>
-                        <p class="small">Focus on capital preservation. Lower returns but with minimal risk. Suitable for short-term goals or if you're close to retirement.</p>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <h6>Moderately Conservative (31-50)</h6>
-                        <p class="small">Some growth potential with moderate risk. Good for medium-term goals or pre-retirement investors who need some growth.</p>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <h6>Moderate (51-70)</h6>
-                        <p class="small">Balanced approach with moderate growth potential and moderate risk. Suitable for medium to long-term goals.</p>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <h6>Moderately Aggressive (71-85)</h6>
-                        <p class="small">Higher growth potential with increased risk. Good for long-term goals and those who can tolerate market volatility.</p>
-                    </div>
-                    
-                    <div>
-                        <h6>Aggressive (86-100)</h6>
-                        <p class="small">Maximum growth potential with highest risk. Best for very long-term goals and those who can withstand significant market fluctuations.</p>
+                <h4>Complete Your Risk Assessment</h4>
+                <p class="text-muted mb-4">Fill out the form to receive personalized investment recommendations based on your risk profile.</p>
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="alert alert-info">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="bi bi-info-circle-fill"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0">Our AI-powered risk assessment tool will analyze your financial situation and risk tolerance to provide tailored asset allocation recommendations.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="card-footer">
-                    <p class="small text-muted mb-0">This analysis is based on your inputs and standard financial principles adapted for the Indian market. Always consult with a certified financial advisor before making major investment decisions.</p>
-                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Update Risk Profile Modal -->
+{% if risk_analysis %}
+<div class="modal fade" id="updateRiskProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Risk Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateRiskForm" method="post" action="/analyze-risk">
+                    <div class="mb-3">
+                        <label for="update_age" class="form-label">Age</label>
+                        <input type="number" class="form-control" id="update_age" name="age" min="18" max="100" value="{{ risk_analysis.age }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="update_investment_horizon" class="form-label">Investment Horizon (years)</label>
+                        <select class="form-select" id="update_investment_horizon" name="investment_horizon" required>
+                            <option value="1" {{ risk_analysis.investment_horizon == 1 ? 'selected' : '' }}>Less than 1 year</option>
+                            <option value="3" {{ risk_analysis.investment_horizon == 3 ? 'selected' : '' }}>1-3 years</option>
+                            <option value="5" {{ risk_analysis.investment_horizon == 5 ? 'selected' : '' }}>3-5 years</option>
+                            <option value="10" {{ risk_analysis.investment_horizon == 10 ? 'selected' : '' }}>5-10 years</option>
+                            <option value="20" {{ risk_analysis.investment_horizon == 20 ? 'selected' : '' }}>More than 10 years</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Risk Tolerance</label>
+                        <div class="py-2">
+                            <input type="range" class="form-range" id="update_risk_tolerance" name="risk_tolerance" min="1" max="10" value="{{ risk_analysis.risk_tolerance }}">
+                            <div class="d-flex justify-content-between">
+                                <span class="small text-muted">Conservative</span>
+                                <span id="updateRiskToleranceValue" class="fw-bold">{{ risk_analysis.risk_tolerance }}/10</span>
+                                <span class="small text-muted">Aggressive</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="update_emergency_fund" class="form-label">Emergency Fund (months)</label>
+                        <select class="form-select" id="update_emergency_fund" name="emergency_fund" required>
+                            <option value="0" {{ risk_analysis.emergency_fund == 0 ? 'selected' : '' }}>No emergency fund</option>
+                            <option value="1" {{ risk_analysis.emergency_fund == 1 ? 'selected' : '' }}>1 month of expenses</option>
+                            <option value="3" {{ risk_analysis.emergency_fund == 3 ? 'selected' : '' }}>3 months of expenses</option>
+                            <option value="6" {{ risk_analysis.emergency_fund == 6 ? 'selected' : '' }}>6 months of expenses</option>
+                            <option value="12" {{ risk_analysis.emergency_fund == 12 ? 'selected' : '' }}>12+ months of expenses</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Income Stability</label>
+                        <div class="py-2">
+                            <input type="range" class="form-range" id="update_income_stability" name="income_stability" min="1" max="10" value="{{ risk_analysis.income_stability }}">
+                            <div class="d-flex justify-content-between">
+                                <span class="small text-muted">Unstable</span>
+                                <span id="updateIncomeStabilityValue" class="fw-bold">{{ risk_analysis.income_stability }}/10</span>
+                                <span class="small text-muted">Very Stable</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="updateRiskForm" class="btn btn-primary">Update & Analyze</button>
             </div>
         </div>
     </div>
 </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .risk-meter {
+        padding-top: 15px;
+    }
+    
+    .risk-indicator {
+        position: absolute;
+        top: -10px;
+        transform: translateX(-50%);
+    }
+    
+    .risk-indicator-point {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background-color: #fff;
+        border: 3px solid #6366f1;
+        margin: 0 auto;
+    }
+    
+    .risk-indicator-label {
+        font-size: 0.75rem;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Risk tolerance slider
+        const riskToleranceSlider = document.getElementById('risk_tolerance');
+        const riskToleranceValue = document.getElementById('riskToleranceValue');
+        const updateRiskToleranceSlider = document.getElementById('update_risk_tolerance');
+        const updateRiskToleranceValue = document.getElementById('updateRiskToleranceValue');
+        
+        // Income stability slider
+        const incomeStabilitySlider = document.getElementById('income_stability');
+        const incomeStabilityValue = document.getElementById('incomeStabilityValue');
+        const updateIncomeStabilitySlider = document.getElementById('update_income_stability');
+        const updateIncomeStabilityValue = document.getElementById('updateIncomeStabilityValue');
+        
+        // Update risk tolerance label
+        if (riskToleranceSlider && riskToleranceValue) {
+            riskToleranceSlider.addEventListener('input', function() {
+                const value = this.value;
+                let riskLabel = '';
+                
+                if (value <= 3) {
+                    riskLabel = 'Conservative';
+                } else if (value <= 6) {
+                    riskLabel = 'Moderate';
+                } else {
+                    riskLabel = 'Aggressive';
+                }
+                
+                riskToleranceValue.textContent = `${riskLabel} (${value})`;
+            });
+        }
+        
+        // Update income stability label
+        if (incomeStabilitySlider && incomeStabilityValue) {
+            incomeStabilitySlider.addEventListener('input', function() {
+                const value = this.value;
+                let stabilityLabel = '';
+                
+                if (value <= 3) {
+                    stabilityLabel = 'Low';
+                } else if (value <= 6) {
+                    stabilityLabel = 'Moderate';
+                } else {
+                    stabilityLabel = 'High';
+                }
+                
+                incomeStabilityValue.textContent = `${stabilityLabel} (${value})`;
+            });
+        }
+        
+        // Update risk tolerance label in modal
+        if (updateRiskToleranceSlider && updateRiskToleranceValue) {
+            updateRiskToleranceSlider.addEventListener('input', function() {
+                const value = this.value;
+                updateRiskToleranceValue.textContent = `${value}/10`;
+            });
+        }
+        
+        // Update income stability label in modal
+        if (updateIncomeStabilitySlider && updateIncomeStabilityValue) {
+            updateIncomeStabilitySlider.addEventListener('input', function() {
+                const value = this.value;
+                updateIncomeStabilityValue.textContent = `${value}/10`;
+            });
+        }
+        
+        // Asset allocation chart
+        const assetAllocationChart = document.getElementById('assetAllocationChart');
+        if (assetAllocationChart) {
+            const ctx = assetAllocationChart.getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Equities', 'Fixed Income', 'Gold', 'Cash'],
+                    datasets: [{
+                        data: [
+                            {{ risk_analysis.result.asset_allocation.equities }}, 
+                            {{ risk_analysis.result.asset_allocation.fixed_income }}, 
+                            {{ risk_analysis.result.asset_allocation.gold }}, 
+                            {{ risk_analysis.result.asset_allocation.cash }}
+                        ],
+                        backgroundColor: [
+                            '#6366f1', // Primary (Equities)
+                            '#9ca3af', // Secondary (Fixed Income)
+                            '#f59e0b', // Warning (Gold)
+                            '#0ea5e9'  // Info (Cash)
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

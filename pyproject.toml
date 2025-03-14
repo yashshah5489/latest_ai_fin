@@ -23,4 +23,9 @@ dependencies = [
     "httpx>=0.28.1",
     "pypdf>=5.3.1",
     "langchain-groq>=0.2.5",
+    "starlette>=0.46.1",
+    "openpyxl>=3.1.5",
+    "email-validator>=2.2.0",
+    "pyjwt>=2.10.1",
+    "alembic>=1.15.1",
 ]

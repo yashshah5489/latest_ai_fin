@@ -9,10 +9,16 @@ export interface NewsItem {
   publishedAt: string;
 }
 
-export async function fetchNews(): Promise<NewsItem[]> {
-  const res = await apiRequest('GET', '/api/news');
-  if (!res.ok) {
-    throw new Error('Failed to fetch news');
-  }
-  return res.json();
+/**
+ * Fetch financial news
+ * @param forceRefresh Whether to force refresh the news cache
+ * @returns Array of news items
+ */
+export async function fetchNews(forceRefresh = false): Promise<NewsItem[]> {
+  const url = forceRefresh 
+    ? '/api/news?force_refresh=true' 
+    : '/api/news';
+  
+  const response = await apiRequest("GET", url);
+  return await response.json();
 }

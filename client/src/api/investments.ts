@@ -37,16 +37,9 @@ export async function fetchPortfolioSummary(): Promise<PortfolioSummary> {
 }
 
 export async function importInvestmentData(formData: FormData): Promise<{ success: boolean; message: string }> {
-  const res = await fetch('/api/investments/import', {
-    method: 'POST',
-    body: formData,
-    credentials: 'include'
+  const res = await apiRequest('POST', '/api/investments/import', formData, {
+    isFormData: true,
   });
-  
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(error || 'Failed to import data');
-  }
   
   return res.json();
 }
